@@ -27,17 +27,18 @@ XImage	*get_zone_to_check(WinManager *wm, Rectangle rectangle)
 	return zone_to_check;
 }
 
-XImage	**get_n_zone_to_check(WinManager *wm, int n)
+XImage	**get_nzone(WinManager *wm, int n)
 {
-	int x, y;
-	unsigned int width, height;
-	XImage **zone_to_check;
+	XImage **zones_to_check;
+	int x = 300;
+	int y = 250;
+	unsigned int width, height = 10;
+	/*
 	for (int i = 0; i < n; i++)
 	{
 		x += 300;
 		y += 250;
-		create_rectangle(x, y, width, height);
-		zone_to_check[i] = XGetImage(wm->display,
+		zones_to_check[i] = XGetImage(wm->display,
 		wm->root,
 		x,
 		y,
@@ -46,10 +47,23 @@ XImage	**get_n_zone_to_check(WinManager *wm, int n)
 		AllPlanes,
 		ZPixmap);
 	}
-	return zone_to_check;
+	*/
+	Rectangle rectangle[n];
+	for (int i = 0; i < n; i++)
+	{
+		rectangle[i] = create_rectangle(x, y, width, height);
+		rectangle[i].x += 300;
+		rectangle[i].y += 350;
+		zones_to_check[i] = get_zone_to_check(wm, rectangle[i]);
+		if (zones_to_check[i] == NULL)
+		{
+			printf("COULD NOT DRAW ZONE\n");
+			return NULL;
+		}
+	}
+	return zones_to_check;
 }	
 
-}
 int	get_bit_shift(unsigned long color_mask)
 {
 	int shift = 0;
@@ -74,12 +88,12 @@ Rgb*	convert_pixel_to_rgb(XImage *zone_to_check, unsigned long pixel)
 	return rgb;
 }
 
-Rgb*	get_color_in_frame(Rectangle rectangle, XImage *zone_to_check)
+Rgb*	get_color_in_frame(XImage *zone_to_check)
 {
 	Rgb *rgb;
 	if (!zone_to_check)
 	{
-		printf("could not define rectangle zone\n");
+		printf("could not define zone\n");
 		return NULL;
 	}
 	printf("IMG WIDTH:%d \nIMG HEIGHT:%d\nIMG DEPTH:%d\n", 
@@ -91,13 +105,13 @@ Rgb*	get_color_in_frame(Rectangle rectangle, XImage *zone_to_check)
 			unsigned long pixel = XGetPixel(zone_to_check, j, i);
 			Rgb* rgb = convert_pixel_to_rgb(zone_to_check, pixel);
 			printf("(%d, %d): R%c G%c B%c %ld\n",
-			(j+rectangle.x), (i+rectangle.y), rgb->r, rgb->g, rgb->b, pixel);
+			(j), (i), rgb->r, rgb->g, rgb->b, pixel);
 		}
 	}
 	return rgb;
 }
 
-int	check_color(XImage *zone_to_check)
+int	check_orange_color(XImage *zone_to_check)
 {
 	// pour la frame 1
 	// on a un counter de orange
@@ -140,10 +154,14 @@ int	compare_colors(Rgb *a, Rgb *b)
 	}
 }
 
-int	check_frame(XImage *zone_1, XImage *zone_2, Rectangle r)
+int	check_frame(XImage **zones_to_check, int n_zone)
 {
-	XImage *zone_1 = get_zone_to_check(wm, r);
-	XImage *zone_2 = get_zone_to_check(wm, r2);
+	for (int i = 0; i < n_zone; i++)
+	{
+		printf("-------------------------\n");
+		printf("COLOURS IN ZONE %d:\n", i);
+		get_color_in_frame(zones_to_check[i]);
+	}
 	Rgb colors_zone_1[100];
 	Rgb colors_zone_2[100];
 
@@ -171,6 +189,7 @@ int	check_frame(XImage *zone_1, XImage *zone_2, Rectangle r)
 
 
 	// get
+	return 0;
 }
 
 // releve la couleur recherche sur la zone
