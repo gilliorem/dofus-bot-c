@@ -4,8 +4,7 @@
 
 Rgb orange_button = {.r = 230, .g = 87, .b = 0};
 
-Rectangle create_rectangle(int x, int y, unsigned int width, unsigned int height)
-{
+Rectangle create_rectangle(int x, int y, unsigned int width, unsigned int height) {
 	Rectangle rectangle;
 	rectangle.x = x;
 	rectangle.y = y;
