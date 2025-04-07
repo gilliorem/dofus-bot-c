@@ -27,6 +27,7 @@ int	get_bit_shift(unsigned long color_mask);
 Rgb*	convert_pixel_to_rgb(XImage *zone_to_check, unsigned long pixel);
 Rgb*	get_color_in_frame(XImage *zone_to_check);
 int	check_color(XImage *zone_to_check);
+int	check_orange_color(XImage *zone_to_check);
 XImage	**get_nzone(WinManager *wm, int n);
 int	compare_colors(Rgb *a, Rgb *b);
 int	check_frame(XImage **zones_to_check, int n_zone);

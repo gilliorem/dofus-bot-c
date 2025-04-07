@@ -1,6 +1,7 @@
 #include "screen_reading.h"
 #include "window_manager.h"
 #include <stdlib.h>
+#include <unistd.h>
 
 Rgb orange_button = {.r = 230, .g = 87, .b = 0};
 
@@ -29,10 +30,11 @@ XImage	*get_zone_to_check(WinManager *wm, Rectangle rectangle)
 
 XImage	**get_nzone(WinManager *wm, int n)
 {
-	XImage **zones_to_check;
+	XImage **zones_to_check = malloc(n * sizeof(XImage*));
 	int x = 300;
 	int y = 250;
-	unsigned int width, height = 10;
+	unsigned int width = 10;
+	unsigned int height = 10;
 	/*
 	for (int i = 0; i < n; i++)
 	{
@@ -52,12 +54,13 @@ XImage	**get_nzone(WinManager *wm, int n)
 	for (int i = 0; i < n; i++)
 	{
 		rectangle[i] = create_rectangle(x, y, width, height);
-		rectangle[i].x += 300;
-		rectangle[i].y += 350;
+		printf("Rectangle %d: x=%d y=%d w=%u h=%u\n", i, rectangle[i].x, rectangle[i].y, rectangle[i].width, rectangle[i].height);
+		x+=300;
+		y+=250;
 		zones_to_check[i] = get_zone_to_check(wm, rectangle[i]);
 		if (zones_to_check[i] == NULL)
 		{
-			printf("COULD NOT DRAW ZONE\n");
+			printf("COULD NOT ALLOCATE MEM AT IMAGE %d\n", i);
 			return NULL;
 		}
 	}
@@ -104,7 +107,7 @@ Rgb*	get_color_in_frame(XImage *zone_to_check)
 		{
 			unsigned long pixel = XGetPixel(zone_to_check, j, i);
 			Rgb* rgb = convert_pixel_to_rgb(zone_to_check, pixel);
-			printf("(%d, %d): R%c G%c B%c %ld\n",
+			printf("(%d, %d): R%d G%d B%d %ld\n",
 			(j), (i), rgb->r, rgb->g, rgb->b, pixel);
 		}
 	}
@@ -125,7 +128,6 @@ int	check_orange_color(XImage *zone_to_check)
 		{
 			unsigned long pixel = XGetPixel(zone_to_check, j, i);
 			Rgb* rgb = convert_pixel_to_rgb(zone_to_check, pixel);
-			int r_check, g_check, b_check ;
 			// si notre pixel est de couleur orange, increment orange counter
 			// for loop ?
 			if (rgb->r == orange_button.r && rgb->g == orange_button.g &&
@@ -134,39 +136,55 @@ int	check_orange_color(XImage *zone_to_check)
 		}
 	}
 	
-	if (orange_counter > 10)
+	if (orange_counter > 9)
 	{
-		printf("ALERT BUTTON IN CENTER OF SCREEN\n");
+		printf("ORANGE BUTTON IN CENTER OF SCREEN\n");
 		return 1;
 	}
+	printf("ORANGE PIXEL:%d\n", orange_counter);
 	return 0;
 }
 
 int	compare_colors(Rgb *a, Rgb *b)
 {
+	int same_frame = 0;
 	for (int i = 0; i < 100; i++)
 	{
-		if (a[i].r == b[i].r && a[i].g == b[i].g && a[i].b == b[i].b);
+		if (a[i].r == b[i].r && a[i].g == b[i].g && a[i].b == b[i].b)
+		{
+			same_frame++;
+			printf("Color match\n");
+		}
 		else
-			printf("frames are not matching\n");
-			return 1;
-		return 0;
+			printf("Different color\n");
 	}
+	if (same_frame < 80)
+		return 0;
+	printf("FRAME MATCHING : %d\n", same_frame);
+	return 0;
 }
 
 int	check_frame(XImage **zones_to_check, int n_zone)
 {
-	for (int i = 0; i < n_zone; i++)
-	{
-		printf("-------------------------\n");
-		printf("COLOURS IN ZONE %d:\n", i);
-		get_color_in_frame(zones_to_check[i]);
-	}
-	Rgb colors_zone_1[100];
-	Rgb colors_zone_2[100];
-
+	Rgb *colors_zone_1;
+	printf("COLORS IN FRAME 1, 1ST ZONE:\n");
+	colors_zone_1 = get_color_in_frame(zones_to_check[0]);
+	Rgb *colors_zone_2;
+	printf("COLORS IN FRAME 1, 2ND ZONE:\n");
+	colors_zone_2 = get_color_in_frame(zones_to_check[1]);
 	
+	sleep(5);
 
+	Rgb *temp_colors_zone_1;
+	printf("COLORS IN FRAME 2 1ST ZONE:\n");
+	temp_colors_zone_1 = get_color_in_frame(zones_to_check[0]);
+	Rgb *temp_colors_zone_2;
+	printf("COLORS IN FRAME 2 2ND ZONE:\n");
+	temp_colors_zone_2 = get_color_in_frame(zones_to_check[1]);
+
+	compare_colors(colors_zone_1, temp_colors_zone_1);
+	compare_colors(colors_zone_2, temp_colors_zone_2);
+	
 	// current rgb :	
 	// rgb est un tableau de struct ?
 	// rgb_zone_1[100] -> rgb.r[0...], rgb.g[0...], rgb.b[0...]
