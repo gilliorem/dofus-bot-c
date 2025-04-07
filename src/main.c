@@ -10,18 +10,14 @@ int	main(void)
 	if (!wm) return 1;
 	Point p;
 
-/*	Rectangle rectangle = create_rectangle(1000, 650, 10, 10);
-	XImage *zone_to_check = get_zone_to_check(wm, rectangle);
-	get_color_in_frame(zone_to_check);	
-	check_orange_color(zone_to_check);	
-*/	
-	int n_zone = 2;
-	XImage **zones_to_check = get_nzone(wm, n_zone);
-	check_frame(zones_to_check, n_zone);
-		
+	log_in(wm);
 	
-
-//	get_mouse_coordinates(wm, &p);
+	
+//	check_frame(wm);
+		
+	//while (1)
+	//	get_mouse_coordinates(wm, &p);
+	sleep(1);
 	XSync(wm->display, False);
 
 	return (0);
