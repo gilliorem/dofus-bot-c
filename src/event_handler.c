@@ -74,10 +74,11 @@ void	reap_wheat(WinManager* wm, int x, int y)
 {
 	move_mouse(wm, x, y);
 	fake_click(wm, 1, True);
-	sleep(.2);
+	sleep(.5);
 	move_mouse(wm, x+=50, y+=70);
-	sleep(.2);
+	sleep(.5);
 	fake_click(wm, 1, True);
+	sleep(8);
 }
 
 

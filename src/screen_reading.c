@@ -6,7 +6,6 @@
 
 Rgb orange_button = {.r = 230, .g = 87, .b = 0};
 Rgb log_in_button = {.r = 242, .g = 146, .b = 0};
-// Rgb wheat
 Rgb wheat = {.r = 56, .g = 62, .b = 15};
 
 Rectangle create_rectangle(int x, int y, unsigned int width, unsigned int height) {
@@ -168,15 +167,38 @@ Rgb*	 get_wheat_color_sequence(WinManager *wm)
 	return wheat_color_sequence;
 }
 
-int	is_wheat(WinManager *wm, Rgb wheat, XImage *zone)
+int	is_wheat(WinManager *wm, Rgb wheat, XImage *zone, Rectangle r_zone)
 {
 	int wheat_match_counter = 0;
 	int tolerance = 10;
+	int wheat_pixel_x = 0;
+	int wheat_pixel_y = 0;
 	for (int i = 0; i < zone->height; i++)
 		for (int j = 0; j < zone->width; j++)
+		{
 			unsigned long pixel = XGetPixel(zone, j, i);
 			Rgb pixel_color = convert_pixel_to_rgb(zone, pixel);
-			if (abs(wheat
+			printf("(%d, %d:", r_zone.x + j, r_zone.y + i);
+			if (abs(wheat.r - pixel_color.r) < tolerance &&
+			abs(wheat.r - pixel_color.r) < tolerance &&
+			abs(wheat.r - pixel_color.r) < tolerance)
+			{
+				wheat_match_counter++;
+				wheat_pixel_x = r_zone.x + j;
+				wheat_pixel_y = r_zone.y + i;
+				printf("pixel color match with wheat color\n");
+			}
+		}
+	if (wheat_match_counter > 40)
+	{
+		printf("IT LOOKS LIKE WE FOUND WHEAT at (%d, %d)\n", r_zone.x, r_zone.y);
+		reap_wheat(wm, wheat_pixel_x, wheat_pixel_y-50);
+	}
+	else
+		printf("NO WHEAT FOUND IN ZONE\n");
+	sleep(2);
+		printf("WHEAT COUNTER : %d\n", wheat_match_counter);
+		return 1;
 }
 
 int	compare_colors(XImage *zone_to_check_a, XImage *zone_to_check_b)
@@ -249,11 +271,13 @@ int	check_frame(WinManager *wm)
 
 int	log_in(WinManager *wm)
 {
-	Rectangle orange_r = create_rectangle(1000, 650, 10, 10);
+	Rectangle orange_r = create_rectangle(1000, 650, 100, 20);
 	XImage *orange_button_zone = get_zone_to_check(wm, orange_r);
 	Rectangle log_r = create_rectangle(600, 500, 10, 10);
 	XImage *log_zone = get_zone_to_check(wm, log_r);
-	if (check_log_in(log_zone) == 1)
+	if (check_orange_color(orange_button_zone) == 1)
+		click_orange_button(wm);
+	else if (check_log_in(log_zone) == 1)
 		click_log_button(wm);
 		
 	sleep(1);

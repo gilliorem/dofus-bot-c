@@ -22,6 +22,7 @@ typedef struct
 
 extern Rgb orange_button;
 extern Rgb log_in_button;
+extern Rgb wheat;
 Rectangle	create_rectangle(int x, int y, unsigned int width, unsigned int height);
 XImage	*get_zone_to_check(WinManager *wm, Rectangle rectangle);
 int	get_bit_shift(unsigned long color_mask);
@@ -30,6 +31,8 @@ Rgb*	get_color_in_frame(WinManager *wm, XImage *zone_to_check);
 int	check_color(XImage *zone_to_check);
 int	check_log_in(XImage *zone_to_check);
 int	check_orange_color(XImage *zone_to_check);
+Rgb*	get_wheat_color_sequence(WinManager *wm);
+int	is_wheat(WinManager *wm, Rgb wheat, XImage *zone, Rectangle r_zone);
 XImage	**get_nzone(WinManager *wm, int n);
 int	compare_colors(XImage *zone_to_check_a, XImage *zone_to_check_b);
 int	check_frame(WinManager *wm);
