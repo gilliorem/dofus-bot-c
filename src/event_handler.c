@@ -54,6 +54,7 @@ void	click_log_button(WinManager *wm)
 
 void	start(WinManager *wm)
 {
+	move_mouse(wm, 544, 530);
 	int i = 0;
 	while (i < 3)
 	{

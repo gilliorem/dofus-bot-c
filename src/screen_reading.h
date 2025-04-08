@@ -33,6 +33,6 @@ int	check_orange_color(XImage *zone_to_check);
 XImage	**get_nzone(WinManager *wm, int n);
 int	compare_colors(XImage *zone_to_check_a, XImage *zone_to_check_b);
 int	check_frame(WinManager *wm);
-void	start(WinManager *wm);
+int	log_in(WinManager *wm);
 
 #endif

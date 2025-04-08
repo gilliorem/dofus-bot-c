@@ -7,6 +7,7 @@
 Rgb orange_button = {.r = 230, .g = 87, .b = 0};
 Rgb log_in_button = {.r = 242, .g = 146, .b = 0};
 // Rgb wheat
+Rgb wheat = {.r = 56, .g = 62, .b = 15};
 
 Rectangle create_rectangle(int x, int y, unsigned int width, unsigned int height) {
 	Rectangle rectangle;
@@ -126,6 +127,7 @@ int	check_log_in(XImage *zone_to_check)
 	return 0;
 }
 
+
 int	check_orange_color(XImage *zone_to_check)
 {
 	int orange_counter = 0;
@@ -150,6 +152,31 @@ int	check_orange_color(XImage *zone_to_check)
 	else
 		printf("No button\n");
 	return 0;
+}
+
+Rgb*	 get_wheat_color_sequence(WinManager *wm)
+{
+	Rectangle wheat_r = create_rectangle(400, 166, 2, 3);
+	Rgb *wheat_color_sequence;
+	XImage *wheat_zone = get_zone_to_check(wm, wheat_r);
+	wheat_color_sequence = get_color_in_frame(wm, wheat_zone);
+
+	sleep(4);
+	XSync(wm->display, False);
+	printf("---------------------\n");
+
+	return wheat_color_sequence;
+}
+
+int	is_wheat(WinManager *wm, Rgb wheat, XImage *zone)
+{
+	int wheat_match_counter = 0;
+	int tolerance = 10;
+	for (int i = 0; i < zone->height; i++)
+		for (int j = 0; j < zone->width; j++)
+			unsigned long pixel = XGetPixel(zone, j, i);
+			Rgb pixel_color = convert_pixel_to_rgb(zone, pixel);
+			if (abs(wheat
 }
 
 int	compare_colors(XImage *zone_to_check_a, XImage *zone_to_check_b)
@@ -194,27 +221,31 @@ int	compare_colors(XImage *zone_to_check_a, XImage *zone_to_check_b)
 
 int	check_frame(WinManager *wm)
 {
-	Rectangle r_a = create_rectangle(400, 150, 200, 100);
+	//zones ble 1 en 5, -24
+	Rectangle r_a = create_rectangle(400, 166, 2, 3);
 	Rgb *colors_zone_one;
-	printf("COLORS IN FRAME 1 1ST ZONE:\n");
 	XImage *zone_one_frame_one = get_zone_to_check(wm, r_a);
-	//printf("COLORS IN FRAME 1, 2ND ZONE:\n");
+	printf("COLORS IN FRAME 1 ZONE 1:\n");
+	colors_zone_one = get_color_in_frame(wm, zone_one_frame_one);
+
+	sleep(4);
+	XSync(wm->display, False);
+	printf("---------------------\n");
+
+	/*
 	Rectangle r_b = create_rectangle(1100, 600, 300, 400);
 	Rgb *colors_zone_two;
 	XImage *zone_two_frame_one = get_zone_to_check(wm, r_b);
-	sleep(4);
-	XSync(wm->display, False);
-	Rgb *temp_colors_zone_one;
-	printf("COLORS IN FRAME 2 1ST ZONE:\n");
-	XImage *zone_one_frame_two = get_zone_to_check(wm, r_a);
-	Rgb *temp_colors_zone_two;
-	//printf("COLORS IN FRAME 2 2ND ZONE:\n");
-	//temp_colors_zone_2 = get_color_in_frame(zones_to_check[1]);
-
-	compare_colors(zone_one_frame_one, zone_one_frame_two);
+	printf("COLORS IN FRAME 1 ZONE 2:\n");
+	colors_zone_two = get_color_in_frame(wm, zone_two_frame_one);
+	*/
+	//compare_colors(zone_one_frame_one, zone_one_frame_two);
 	// can return 0 1 2 3 according to the current frame we are
 	return 0;
 }
+
+
+
 
 int	log_in(WinManager *wm)
 {
@@ -224,6 +255,7 @@ int	log_in(WinManager *wm)
 	XImage *log_zone = get_zone_to_check(wm, log_r);
 	if (check_log_in(log_zone) == 1)
 		click_log_button(wm);
+		
 	sleep(1);
 	start(wm);
 	// check_zone_pour voir si en jeu

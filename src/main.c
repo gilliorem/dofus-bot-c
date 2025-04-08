@@ -10,13 +10,13 @@ int	main(void)
 	if (!wm) return 1;
 	Point p;
 
-	log_in(wm);
+//	log_in(wm);
 	
 	
-//	check_frame(wm);
+	check_frame(wm);
 		
-	//while (1)
-	//	get_mouse_coordinates(wm, &p);
+//	while (1)
+		get_mouse_coordinates(wm, &p);
 	sleep(1);
 	XSync(wm->display, False);
 
