@@ -2,15 +2,7 @@
 #define WINDOW_MANAGER_H
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-
-typedef struct 
-{
-	Display *display;
-	Window root;
-	Window specific_window;
-	XWindowAttributes window_attributes;
-	XEvent event;
-} WinManager;
+#include "types.h"
 
 WinManager	*setXConnection(void);
 void	get_window_name(WinManager *wm);

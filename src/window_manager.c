@@ -1,3 +1,4 @@
+#include "types.h"
 #include "window_manager.h"
 #include <stdio.h> 
 #include <stdlib.h>
@@ -45,7 +46,7 @@ void 	get_window_name(WinManager *wm)
 			if (strstr(window_name_return, "dofus-retro") != NULL)
 				{
 					counter++;
-					wm->specific_window = parent_return;
+					wm->window = parent_return;
 					printf("%s\n", window_name_return);
 				}
 		}
@@ -62,7 +63,7 @@ void	get_subwindows(WinManager *wm)
 	Window root_return, parent_return;
 	Window *children_return;
 	unsigned int nchildren_return;
-//	XQueryTree(wm->display, wm->specific_window, &root_return, &parent_return, &children_return, &nchildren_return);
+//	XQueryTree(wm->display, wm->window, &root_return, &parent_return, &children_return, &nchildren_return);
 
 	printf("numbers of subwindows : %d\n", nchildren_return);
 }

@@ -1,12 +1,53 @@
-#include "screen_reading.h"
-#include "window_manager.h"
-#include "event_handler.h"
+#include "types.h"
 #include <stdlib.h>
 #include <unistd.h>
+#include "screen_reading.h"
+#include "event_handler.h"
+#include "window_manager.h"
 
 Rgb orange_button = {.r = 230, .g = 87, .b = 0};
 Rgb log_in_button = {.r = 242, .g = 146, .b = 0};
 Rgb wheat = {.r = 56, .g = 62, .b = 15};
+
+Rgb context_menu_light_gray[3] = {
+	{.r = 173, .g = 165, .b = 126},
+	{.r = 173, .g = 165, .b = 126},
+	{.r = 173, .g = 165, .b = 126}
+};
+
+Rgb context_menu_dark_gray[3] = {
+	{.r = 81, .g = 74, .b = 60},
+	{.r = 81, .g = 74, .b = 60},
+	{.r = 81, .g = 74, .b = 60}
+};
+
+Rgb context_menu_orange[3] = {
+	{.r = 255, .g = 102, .b = 0},
+	{.r = 255, .g = 102, .b = 0},
+	{.r = 255, .g = 102, .b = 0}
+};
+
+
+Rgb wheat_color_pattern[3] = {
+	{.r = 175, .g = 143, .b = 22},
+	{.r = 171, .g = 114, .b = 21},
+	{.r = 185, .g = 127, .b = 42},
+};
+
+/*
+Rgb wheat_color_pattern[10] = {
+	{.r = 149, .g = 153, .b = 79},
+	{.r = 138, .g = 139, .b = 67},
+	{.r = 135, .g = 135, .b = 63},
+	{.r = 141, .g = 140, .b = 66},
+	{.r = 147, .g = 144, .b = 70},
+	{.r = 148, .g = 147, .b = 74},
+	{.r = 157, .g = 156, .b = 80},
+	{.r = 163, .g = 165, .b = 85},
+	{.r = 173, .g = 177, .b = 88},
+	{.r = 186, .g = 191, .b = 95}
+};
+*/
 
 Rectangle create_rectangle(int x, int y, unsigned int width, unsigned int height) {
 	Rectangle rectangle;
@@ -153,11 +194,10 @@ int	check_orange_color(XImage *zone_to_check)
 	return 0;
 }
 
-Rgb*	 get_wheat_color_sequence(WinManager *wm)
+Rgb*	 get_color_sequence(WinManager *wm, Rectangle zone_r)
 {
-	Rectangle wheat_r = create_rectangle(400, 166, 2, 3);
 	Rgb *wheat_color_sequence;
-	XImage *wheat_zone = get_zone_to_check(wm, wheat_r);
+	XImage *wheat_zone = get_zone_to_check(wm, zone_r);
 	wheat_color_sequence = get_color_in_frame(wm, wheat_zone);
 
 	sleep(4);
@@ -166,6 +206,7 @@ Rgb*	 get_wheat_color_sequence(WinManager *wm)
 
 	return wheat_color_sequence;
 }
+
 
 int	is_wheat(WinManager *wm, Rgb wheat, XImage *zone, Rectangle r_zone)
 {
@@ -200,6 +241,153 @@ int	is_wheat(WinManager *wm, Rgb wheat, XImage *zone, Rectangle r_zone)
 		printf("WHEAT COUNTER : %d\n", wheat_match_counter);
 		return 1;
 }
+
+void	build_color_matrix(Rgb color_matrix[1920][1080], XImage *pixel_zone, Rectangle zone)
+{
+	for (int y = 0; y < 1080; y++)
+		for (int x = 0; x < 1920; x++)
+			color_matrix[x][y] = (Rgb){0,0,0};
+
+	for (int y = 0; y < pixel_zone->height; y++)
+	{
+		for (int x = 0; x < pixel_zone->width; x++)
+		{
+			unsigned long pixel = XGetPixel(pixel_zone, x, y);
+			Rgb pixel_color = convert_pixel_to_rgb(pixel_zone, pixel);
+			color_matrix[x][y] = pixel_color;
+		}
+	}
+}
+
+int	 compare_color_pattern(WinManager *wm, Rgb *ref_color_pattern, Rgb color_matrix[1920][1080], int pixel_pattern_length, Point pixel_match[])
+{
+	int tolerance = 3;
+	int same_pattern_count = 0;
+	bool match_found = false;
+	for (int y = 0; y < 1080; y++)
+	{
+		for (int x = 0; x < 1920 - pixel_pattern_length; x++)
+		{
+			match_found = true;
+			for (int i = 0; i < pixel_pattern_length; i++)
+			{
+				Rgb pixel = color_matrix[x + i][y];
+				Rgb ref = ref_color_pattern[i];
+				if (abs(pixel.r - ref.r) > tolerance ||
+				abs(pixel.g - ref.g) > tolerance ||
+				abs(pixel.b - ref.b) > tolerance)
+				{
+					match_found = false;
+					break;
+				}
+			}
+			if (match_found)
+			{
+				pixel_match[same_pattern_count].x = x;
+				pixel_match[same_pattern_count].y = y;
+				same_pattern_count++;
+				printf("(%d, %d): PIXEL MATCH\n", x, y);
+				reap_wheat(wm, x, y);
+			}
+
+		}
+
+	}
+	printf("FOUND %d wheat pattern accros the map\n", same_pattern_count);
+
+	return same_pattern_count;
+}
+
+void open_inventory(WinManager *wm)
+{
+	move_mouse(wm, 1322, 886);
+	sleep(1);
+	fake_click(wm, 1, true);
+	sleep(1);
+}
+
+void close_inventory(WinManager *wm)
+{
+	move_mouse(wm, 1629, 122);
+	sleep(1);
+	fake_click(wm, 1, true);
+	sleep(1);
+}
+
+int	check_orange_color_pods(WinManager *wm, XImage *zone_to_check)
+{
+	int orange_counter = 0;
+	int tolerance = 5;
+	open_inventory(wm);
+	for (int i = 0; i < zone_to_check->height ; i++)
+	{
+		for (int j = 0; j < zone_to_check->width ; j++)
+		{
+			unsigned long pixel = XGetPixel(zone_to_check, j, i);
+			Rgb rgb = convert_pixel_to_rgb(zone_to_check, pixel);
+			if (abs(rgb.r - orange_button.r) < tolerance
+			&& abs(rgb.g - orange_button.g) < tolerance
+			&& abs(rgb.b - orange_button.b) < tolerance)
+				orange_counter++;
+		}
+	}
+	if (orange_counter > 5)
+	{
+		printf("FULL PODS\n");
+		return 1;
+	}
+	else
+	{
+		printf("pas encore full pods\n");
+		close_inventory(wm);
+	}
+	return 0;
+}
+
+
+/*
+int	context_menu_visible(WinManager *wm, Point pixel_match[], int size)
+{
+	for (int i = 0; i < size; i++)
+	{
+		printf("MOVING MOUSE IN %d %d\n", pixel_match[i].x, pixel_match[i].y);
+		move_mouse(wm, pixel_match[i].x, pixel_match[i].y);
+		sleep(1);
+		fake_click(wm, 1, true);
+		sleep(3);
+	}
+	return 0;
+}
+*/
+/*
+int	test_match(WinManager *wm, Rgb *ref_color_pattern, Point pixel_match[], int size)
+{
+	int context_menu_counter = 0;
+	int context_menu_hover = 0; 
+	Rgb color_matrix[1920][1080];
+	for (int i = 0; i < size; i+=10)
+	{
+		move_mouse(wm, pixel_match[i].x, pixel_match[i].y);
+		sleep(.3);
+		fake_click(wm, 1, true);
+		sleep(.3);
+		context_menu_counter = compare_colors(ref_color_pattern, color_matrix, 3, pixel_match[size]);
+		context_menu_counter += compare_colors(ref_color_pattern, color_matrix, 3, pixel_match[size]);
+		if (context_menu_counter > 4)
+			{
+				move_mouse(wm, pixel_match[i].x + 50, pixel_match[i].y + 75);
+				context_menu_hover = compare_colors(context_menu_orange, color_matrix[1920][1080], 3, pixel_match[size]);
+				if (context_menu_hover > 2)
+				{
+					sleep(.5);
+					fake_click(wm, 1, true);
+					sleep(8);
+				}
+			}
+	}
+	return 0;
+}
+*/
 
 int	compare_colors(XImage *zone_to_check_a, XImage *zone_to_check_b)
 {
@@ -265,9 +453,6 @@ int	check_frame(WinManager *wm)
 	// can return 0 1 2 3 according to the current frame we are
 	return 0;
 }
-
-
-
 
 int	log_in(WinManager *wm)
 {
