@@ -40,7 +40,16 @@ Rgb barley_color_pattern[3] = {
 	{.r = 120, .g = 133, .b = 0}
 };
 
+Rgb oat_color_pattern[3] = {
+	{.r = 195, .g = 155, .b = 3},
+	{.r = 188, .g = 120, .b = 0},
+	{.r = 174, .g = 120, .b = 0},
+};
 
+Rgb hop_color_pattern[2] = {
+	{.r = 18, .g = 86, .b = 84},
+	{.r = 18, .g = 86, .b = 85},
+};
 Rectangle create_rectangle(int x, int y, unsigned int width, unsigned int height) {
 	Rectangle rectangle;
 	rectangle.x = x;
@@ -136,7 +145,7 @@ Rgb*	get_color_in_frame(WinManager *wm, XImage *zone_to_check)
 int	check_log_in(XImage *zone_to_check)
 {
 	int orange_counter = 0;
-	int tolerance = 2;
+	int tolerance = 10;
 	for (int i = 0; i < zone_to_check->height ; i++)
 	{
 		for (int j = 0; j < zone_to_check->width ; j++)
@@ -154,8 +163,7 @@ int	check_log_in(XImage *zone_to_check)
 		printf("LOG IN BUTTON IN ZONE\n");
 		return 1;
 	}
-	else
-		printf("No button\n");
+	printf("No button\n");
 	return 0;
 }
 
@@ -163,7 +171,7 @@ int	check_log_in(XImage *zone_to_check)
 int	check_orange_color(XImage *zone_to_check)
 {
 	int orange_counter = 0;
-	int tolerance = 10;
+	int tolerance = 5;
 	for (int i = 0; i < zone_to_check->height ; i++)
 	{
 		for (int j = 0; j < zone_to_check->width ; j++)
@@ -178,11 +186,59 @@ int	check_orange_color(XImage *zone_to_check)
 	}
 	if (orange_counter > 30)
 	{
+		printf("%d ORANGE PIXELS\n", orange_counter);
 		printf("ORANGE BUTTON IN ZONE\n");
 		return 1;
 	}
 	else
 		printf("No button\n");
+	return 0;
+}
+
+int	check_orange_context_menu_color(XImage *zone_to_check, int tolerance)
+{
+	int context_menu_counter = 0;
+	for (int j = 0; j < zone_to_check->height; j++)
+	{
+		for (int i = 0; i < zone_to_check->width; i++)
+		{
+			unsigned pixel = XGetPixel(zone_to_check, j, i);
+			Rgb rgb = convert_pixel_to_rgb(zone_to_check, pixel);
+			if (abs(rgb.r - context_menu_orange[0].r) > tolerance
+			&& abs(rgb.g - context_menu_orange[0].g) > tolerance
+			&& abs(rgb.b - context_menu_orange[0].b) > tolerance)
+			{
+				printf("COULD NOT FIND ORANGE CONTEXT MENU COLOR\n");
+				break;
+			}
+			else
+			{
+				context_menu_counter++;
+				printf("+1 ORANGE VISIBLE\n");
+			}
+		}
+	}
+	if (context_menu_counter >=  zone_to_check->width)
+	{
+		printf("Orange button of context menu spotted\n");
+		printf("Orange pixels spotted : %d\n", context_menu_counter);
+		return 1;
+	}
+	printf("Orange pixels spotted : %d, less than width : %d\n", context_menu_counter, zone_to_check->width);
+	return 0;
+}
+
+int	ready_button_visible(WinManager *wm)
+{
+	Rectangle ready_button_zone = create_rectangle(1520, 800, 30, 4);
+	XImage *ready_button_image = get_zone_to_check(wm, ready_button_zone);
+	printf("checking if in combat ...\n");
+	if (check_orange_context_menu_color(ready_button_image, 5) == 1)
+	{
+		printf("Ready button found\n");
+		return 1;
+	}
+	printf("Not in combat, keep fauching\n");
 	return 0;
 }
 
@@ -250,9 +306,8 @@ void	build_color_matrix(Rgb color_matrix[1920][1080], XImage *pixel_zone, Rectan
 	}
 }
 
-int	 compare_color_pattern(WinManager *wm, Rgb *ref_color_pattern, Rgb color_matrix[1920][1080], int pixel_pattern_length, Point pixel_match[])
+int	 compare_color_pattern(WinManager *wm, Rgb *ref_color_pattern, Rgb color_matrix[1920][1080], int pixel_pattern_length, Point pixel_match[], int tolerance)
 {
-	int tolerance = 8;
 	int same_pattern_count = 0;
 	bool match_found = false;
 	for (int y = 0; y < 1080; y++)
@@ -279,13 +334,24 @@ int	 compare_color_pattern(WinManager *wm, Rgb *ref_color_pattern, Rgb color_mat
 				same_pattern_count++;
 				printf("(%d, %d): PIXEL MATCH\n", x, y);
 				reap_wheat(wm, x, y);
+				if (ready_button_visible(wm) == 1)
+					return 1;
 			}
-
 		}
-
+	
 	}
-	printf("FOUND %d cereal pattern pattern accros the map\n", same_pattern_count);
-
+	printf("FOUND %d cereal matching pattern accros the map\n", same_pattern_count);
+	for (int i = 0; i < 2; i++)
+		if (same_pattern_count < 1)
+		{
+			if (i == 1)
+			{
+				printf("could not found cereals twice, need to change map\n");
+				return 0;
+			}
+			printf("didnt find matching cereals pattern, waiting 60sec\n");
+			sleep(60);
+		}
 	return same_pattern_count;
 }
 
@@ -336,20 +402,7 @@ int	check_orange_color_pods(WinManager *wm, XImage *zone_to_check)
 }
 
 
-/*
-int	context_menu_visible(WinManager *wm, Point pixel_match[], int size)
-{
-	for (int i = 0; i < size; i++)
-	{
-		printf("MOVING MOUSE IN %d %d\n", pixel_match[i].x, pixel_match[i].y);
-		move_mouse(wm, pixel_match[i].x, pixel_match[i].y);
-		sleep(1);
-		fake_click(wm, 1, true);
-		sleep(3);
-	}
-	return 0;
-}
-*/
+
 /*
 int	test_match(WinManager *wm, Rgb *ref_color_pattern, Point pixel_match[], int size)
 {
