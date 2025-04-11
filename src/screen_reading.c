@@ -34,20 +34,12 @@ Rgb wheat_color_pattern[3] = {
 	{.r = 185, .g = 127, .b = 42},
 };
 
-/*
-Rgb wheat_color_pattern[10] = {
-	{.r = 149, .g = 153, .b = 79},
-	{.r = 138, .g = 139, .b = 67},
-	{.r = 135, .g = 135, .b = 63},
-	{.r = 141, .g = 140, .b = 66},
-	{.r = 147, .g = 144, .b = 70},
-	{.r = 148, .g = 147, .b = 74},
-	{.r = 157, .g = 156, .b = 80},
-	{.r = 163, .g = 165, .b = 85},
-	{.r = 173, .g = 177, .b = 88},
-	{.r = 186, .g = 191, .b = 95}
+Rgb barley_color_pattern[3] = {
+	{.r = 120, .g = 130, .b = 0},
+	{.r = 116, .g = 130, .b = 1},
+	{.r = 120, .g = 133, .b = 0}
 };
-*/
+
 
 Rectangle create_rectangle(int x, int y, unsigned int width, unsigned int height) {
 	Rectangle rectangle;
@@ -144,7 +136,7 @@ Rgb*	get_color_in_frame(WinManager *wm, XImage *zone_to_check)
 int	check_log_in(XImage *zone_to_check)
 {
 	int orange_counter = 0;
-	int tolerance = 10;
+	int tolerance = 2;
 	for (int i = 0; i < zone_to_check->height ; i++)
 	{
 		for (int j = 0; j < zone_to_check->width ; j++)
@@ -207,7 +199,6 @@ Rgb*	 get_color_sequence(WinManager *wm, Rectangle zone_r)
 	return wheat_color_sequence;
 }
 
-
 int	is_wheat(WinManager *wm, Rgb wheat, XImage *zone, Rectangle r_zone)
 {
 	int wheat_match_counter = 0;
@@ -261,7 +252,7 @@ void	build_color_matrix(Rgb color_matrix[1920][1080], XImage *pixel_zone, Rectan
 
 int	 compare_color_pattern(WinManager *wm, Rgb *ref_color_pattern, Rgb color_matrix[1920][1080], int pixel_pattern_length, Point pixel_match[])
 {
-	int tolerance = 3;
+	int tolerance = 8;
 	int same_pattern_count = 0;
 	bool match_found = false;
 	for (int y = 0; y < 1080; y++)
@@ -293,7 +284,7 @@ int	 compare_color_pattern(WinManager *wm, Rgb *ref_color_pattern, Rgb color_mat
 		}
 
 	}
-	printf("FOUND %d wheat pattern accros the map\n", same_pattern_count);
+	printf("FOUND %d cereal pattern pattern accros the map\n", same_pattern_count);
 
 	return same_pattern_count;
 }

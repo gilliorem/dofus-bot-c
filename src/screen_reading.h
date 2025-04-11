@@ -13,6 +13,7 @@ extern Rgb context_menu_light_gray[3];
 extern Rgb context_menu_dark_gray[3];
 extern Rgb context_menu_orange[3];
 extern Rgb wheat_color_pattern[3];
+extern Rgb barley_color_pattern[3];
 
 Rectangle	create_rectangle(int x, int y, unsigned int width, unsigned int height);
 XImage	*get_zone_to_check(WinManager *wm, Rectangle rectangle);
