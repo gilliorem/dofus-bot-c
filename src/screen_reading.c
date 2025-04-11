@@ -9,6 +9,12 @@ Rgb orange_button = {.r = 230, .g = 87, .b = 0};
 Rgb log_in_button = {.r = 242, .g = 146, .b = 0};
 Rgb wheat = {.r = 56, .g = 62, .b = 15};
 
+Rgb mandrage_color_pattern[3] = {
+	{.r = 138, .g = 0, .b = 7},
+	{.r = 138, .g = 0, .b = 7},
+	{.r = 74, .g = 4, .b = 35}
+};
+
 Rgb context_menu_light_gray[3] = {
 	{.r = 173, .g = 165, .b = 126},
 	{.r = 173, .g = 165, .b = 126},
@@ -46,9 +52,12 @@ Rgb oat_color_pattern[3] = {
 	{.r = 174, .g = 120, .b = 0},
 };
 
-Rgb hop_color_pattern[2] = {
-	{.r = 18, .g = 86, .b = 84},
-	{.r = 18, .g = 86, .b = 85},
+Rgb hop_color_pattern[5] = {
+	{.r = 21, .g = 82, .b = 80},
+	{.r = 17, .g = 86, .b = 91},
+	{.r = 14, .g = 80, .b = 85},
+	{.r = 14, .g = 78, .b = 82},
+	{.r = 30, .g = 88, .b = 94},
 };
 Rectangle create_rectangle(int x, int y, unsigned int width, unsigned int height) {
 	Rectangle rectangle;
@@ -205,8 +214,8 @@ int	check_orange_context_menu_color(XImage *zone_to_check, int tolerance)
 			unsigned pixel = XGetPixel(zone_to_check, j, i);
 			Rgb rgb = convert_pixel_to_rgb(zone_to_check, pixel);
 			if (abs(rgb.r - context_menu_orange[0].r) > tolerance
-			&& abs(rgb.g - context_menu_orange[0].g) > tolerance
-			&& abs(rgb.b - context_menu_orange[0].b) > tolerance)
+			|| abs(rgb.g - context_menu_orange[0].g) > tolerance
+			|| abs(rgb.b - context_menu_orange[0].b) > tolerance)
 			{
 				printf("COULD NOT FIND ORANGE CONTEXT MENU COLOR\n");
 				break;
@@ -289,11 +298,11 @@ int	is_wheat(WinManager *wm, Rgb wheat, XImage *zone, Rectangle r_zone)
 		return 1;
 }
 
-void	build_color_matrix(Rgb color_matrix[1920][1080], XImage *pixel_zone, Rectangle zone)
+void	build_color_matrix(Rgb color_matrix[1080][1920], XImage *pixel_zone, Rectangle zone)
 {
 	for (int y = 0; y < 1080; y++)
 		for (int x = 0; x < 1920; x++)
-			color_matrix[x][y] = (Rgb){0,0,0};
+			color_matrix[y][x] = (Rgb){0,0,0};
 
 	for (int y = 0; y < pixel_zone->height; y++)
 	{
@@ -301,12 +310,12 @@ void	build_color_matrix(Rgb color_matrix[1920][1080], XImage *pixel_zone, Rectan
 		{
 			unsigned long pixel = XGetPixel(pixel_zone, x, y);
 			Rgb pixel_color = convert_pixel_to_rgb(pixel_zone, pixel);
-			color_matrix[x][y] = pixel_color;
+			color_matrix[y][x] = pixel_color;
 		}
 	}
 }
 
-int	 compare_color_pattern(WinManager *wm, Rgb *ref_color_pattern, Rgb color_matrix[1920][1080], int pixel_pattern_length, Point pixel_match[], int tolerance)
+int	 compare_color_pattern(WinManager *wm, Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance)
 {
 	int same_pattern_count = 0;
 	bool match_found = false;
@@ -317,7 +326,7 @@ int	 compare_color_pattern(WinManager *wm, Rgb *ref_color_pattern, Rgb color_mat
 			match_found = true;
 			for (int i = 0; i < pixel_pattern_length; i++)
 			{
-				Rgb pixel = color_matrix[x + i][y];
+				Rgb pixel = color_matrix[y][x + i];
 				Rgb ref = ref_color_pattern[i];
 				if (abs(pixel.r - ref.r) > tolerance ||
 				abs(pixel.g - ref.g) > tolerance ||
@@ -329,8 +338,6 @@ int	 compare_color_pattern(WinManager *wm, Rgb *ref_color_pattern, Rgb color_mat
 			}
 			if (match_found)
 			{
-				pixel_match[same_pattern_count].x = x;
-				pixel_match[same_pattern_count].y = y;
 				same_pattern_count++;
 				printf("(%d, %d): PIXEL MATCH\n", x, y);
 				reap_wheat(wm, x, y);
@@ -340,7 +347,7 @@ int	 compare_color_pattern(WinManager *wm, Rgb *ref_color_pattern, Rgb color_mat
 		}
 	
 	}
-	printf("FOUND %d cereal matching pattern accros the map\n", same_pattern_count);
+	printf("FOUND %d cereal matching pattern across the map\n", same_pattern_count);
 	for (int i = 0; i < 2; i++)
 		if (same_pattern_count < 1)
 		{
@@ -354,6 +361,161 @@ int	 compare_color_pattern(WinManager *wm, Rgb *ref_color_pattern, Rgb color_mat
 		}
 	return same_pattern_count;
 }
+
+Point	find_player(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance)
+{
+	Point player_pos;
+	int same_pattern_counter = 0;
+	bool match = false;
+	for (int y = 0; y  < 790; y++)
+	{
+		for (int x = 0; x < 1920 - pixel_pattern_length; x++)
+		{
+			match = true;
+			for (int i = 0; i < pixel_pattern_length; i++)
+			{
+				Rgb pixel = color_matrix[y][x + i];
+				Rgb ref = ref_color_pattern[i];
+				if  (abs(pixel.r - ref.r) > tolerance
+				|| abs(pixel.g - ref. g) > tolerance
+				|| abs(pixel.b - ref.b) > tolerance)
+				{
+					match = false;
+					break;
+				}
+			}
+			if (match)
+			{
+				same_pattern_counter++;
+				player_pos.x = x;
+				player_pos.y = y;
+			}
+		}
+	}
+	printf("FOUND A TOTAL OF %d PIXELS MATCHING PLAYER'S COLOR PATTERN ACROSS THE MAP\n", same_pattern_counter);
+	if (same_pattern_counter < 1)
+	{
+		printf("COULD NOT FIND ANY PLAYER'S COLOR PATTERN\n");
+		return (Point){-1, -1};
+	}
+	printf("PLAYER POS: [%d, %d]\n", player_pos.x, player_pos.y);
+	return player_pos;
+}
+
+Point	find_enemy(Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance)
+{
+	Rgb enemy_color_pattern[20];
+	for (int i = 0; i < 20; i++)
+	{
+		enemy_color_pattern[i].r = 0;
+		enemy_color_pattern[i].g = 0;
+		enemy_color_pattern[i].b = 255;
+	}
+	Point enemy_pos;
+	int same_pattern_counter = 0;
+	bool match = false;
+	for (int y = 0; y  < 1080; y++)
+	{
+		for (int x = 0; x < 1920 - pixel_pattern_length; x++)
+		{
+			match = true;
+			for (int i = 0; i < pixel_pattern_length; i++)
+			{
+				Rgb pixel = color_matrix[y][x+i];
+				Rgb ref = enemy_color_pattern[i];
+				if  (abs(pixel.r - ref.r) > tolerance
+				|| abs(pixel.g - ref. g) > tolerance
+				|| abs(pixel.b - ref.b) > tolerance)
+				{
+					match = false;
+					break;
+				}
+			}
+			if (match)
+			{
+				same_pattern_counter++;
+				enemy_pos.x = x;
+				enemy_pos.y = y;
+			}
+		}
+	}
+	printf("FOUND A TOTAL OF %d PIXEL MATCHING ENEMY[BLUE] PATTERN ACROSS THE SCREEN\n", same_pattern_counter);
+	if (same_pattern_counter < 1)
+	{
+		printf("COULD NOT FIND ANY ENEMY[BLUE] PATTERN MATCH\n");
+		return (Point){-1, -1};
+	}
+	printf("ENEMY POS: [%d, %d]\n", enemy_pos.x, enemy_pos.y);
+	return enemy_pos;
+}
+
+// on veut se rapprocher de lennemi le plus possible
+// autrement dit on veut diminuer la difference de position 
+// autrement dit si player.x = 500 et enemy.x = 1000 
+// on veut faire passer player.x de 500 a 1000 ou le pplus proche possible
+// comment on fait ?
+// on a notre pos et celle de l'enemi
+// deja on peut cliquer autour de notre joueur aleotoire,ent et regarder si la diff entre les x et y augmentent ou diminue.
+// si elle augmente on revient sur la pos d'avant et on ne ve pas plus sur cette pos
+// si elle baisse on 'sauvegarde cette pos en n1 des pos a aller
+
+int	placement(Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance, Point player_pos, Point enemy_pos)
+{
+	// on regarde les pattern rouge de 88 pixels qui se suivent
+	// une case rouge represente 88 pixels rouge a 255 0 0
+	// donc si on veut se mettre au milieu on se met a 44 px.
+	Rgb red_square_color_pattern[pixel_pattern_length];
+	int red_square_counter = 0;
+	bool match = false;
+	Point red_square_pos;
+	printf("PLAYER IS CURRENTLY IN (%d, %d)\n", player_pos.x, player_pos.y);
+	printf("ENEMY IS CURRENTLY IN (%d, %d)\n", enemy_pos.x, enemy_pos.y);
+	printf("X DISTANCE BETWEEN PLAYER AND ENEMY : %d\n", abs(player_pos.x - enemy_pos.x));
+	printf("Y DISTANCE BETWEEN PLAYER AND ENEMY : %d\n", abs(player_pos.y - enemy_pos.y));
+	for (int i = 0; i < pixel_pattern_length; i++)
+	{
+		red_square_color_pattern[i].r = 255;
+		red_square_color_pattern[i].g = 0;
+		red_square_color_pattern[i].b = 0;
+	}
+	for (int y = 0; y  < 800; y++)
+	{
+		for (int x = 0; x < 1920 - pixel_pattern_length; x++)
+		{
+			match = true;
+			for (int i = 0; i < pixel_pattern_length; i++)
+			{
+				Rgb pixel = color_matrix[y][x+i];
+				Rgb ref = red_square_color_pattern[i];
+				if  (abs(pixel.r - ref.r) > tolerance
+				|| abs(pixel.g - ref. g) > tolerance
+				|| abs(pixel.b - ref.b) > tolerance)
+				{
+					match = false;
+					break;
+				}
+			}
+			if (match)
+			{
+				red_square_counter++;
+				red_square_pos.x = x + (pixel_pattern_length / 2);
+				red_square_pos.y = y;
+				printf("RED SQUARE POS: [%d, %d]\n", red_square_pos.x, red_square_pos.y);
+			}
+		}
+	}
+	printf("FOUND A TOTAL OF %d RED SQUARES ACROSS THE SCREEN\n", red_square_counter);
+	if (red_square_counter < 1)
+	{
+		printf("COULD NOT FIND ANY RED SQUARE ON MAP\n");
+		return 1;
+	}
+	printf("RED SQUARE POS: [%d, %d]\n", red_square_pos.x, red_square_pos.y);
+	return 0;
+}
+
+// on va print les cases : mais enft il ne faut pas return un Point mais un tableau de Point pour pouvoir travailler
+// sur chaque point 
 
 void open_inventory(WinManager *wm)
 {
