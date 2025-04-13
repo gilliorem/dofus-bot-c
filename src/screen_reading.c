@@ -5,7 +5,7 @@
 #include "event_handler.h"
 #include "window_manager.h"
 
-Rgb orange_button = {.r = 230, .g = 87, .b = 0};
+Rgb orange_button = {.r = 255, .g = 102, .b = 0};
 Rgb log_in_button = {.r = 242, .g = 146, .b = 0};
 Rgb wheat = {.r = 56, .g = 62, .b = 15};
 
@@ -26,13 +26,6 @@ Rgb context_menu_dark_gray[3] = {
 	{.r = 81, .g = 74, .b = 60},
 	{.r = 81, .g = 74, .b = 60}
 };
-
-Rgb context_menu_orange[3] = {
-	{.r = 255, .g = 102, .b = 0},
-	{.r = 255, .g = 102, .b = 0},
-	{.r = 255, .g = 102, .b = 0}
-};
-
 
 Rgb wheat_color_pattern[3] = {
 	{.r = 175, .g = 143, .b = 22},
@@ -59,6 +52,11 @@ Rgb hop_color_pattern[5] = {
 	{.r = 14, .g = 78, .b = 82},
 	{.r = 30, .g = 88, .b = 94},
 };
+
+Rgb scarecrow_hat_dark_brown = {.r = 125, .g = 81, .b = 33};
+Rgb hop_keeper = {.r = 0, .b = 50, .g = 0};
+Rgb blue_color = {.r = 0, .b = 255, .g = 0};
+
 Rectangle create_rectangle(int x, int y, unsigned int width, unsigned int height) {
 	Rectangle rectangle;
 	rectangle.x = x;
@@ -204,50 +202,50 @@ int	check_orange_color(XImage *zone_to_check)
 	return 0;
 }
 
-int	check_orange_context_menu_color(XImage *zone_to_check, int tolerance)
+int	check_orange_context_menu_color(XImage *zone_to_check, Rgb orange_button, int tolerance)
 {
-	int context_menu_counter = 0;
+	int orange_pixel_counter = 0;
 	for (int j = 0; j < zone_to_check->height; j++)
 	{
 		for (int i = 0; i < zone_to_check->width; i++)
 		{
 			unsigned pixel = XGetPixel(zone_to_check, j, i);
 			Rgb rgb = convert_pixel_to_rgb(zone_to_check, pixel);
-			if (abs(rgb.r - context_menu_orange[0].r) > tolerance
-			|| abs(rgb.g - context_menu_orange[0].g) > tolerance
-			|| abs(rgb.b - context_menu_orange[0].b) > tolerance)
+			if (abs(rgb.r - orange_button.r) > tolerance
+			|| abs(rgb.g - orange_button.g) > tolerance
+			|| abs(rgb.b - orange_button.b) > tolerance)
 			{
 				printf("COULD NOT FIND ORANGE CONTEXT MENU COLOR\n");
 				break;
 			}
 			else
 			{
-				context_menu_counter++;
+				orange_pixel_counter++;
 				printf("+1 ORANGE VISIBLE\n");
 			}
 		}
 	}
-	if (context_menu_counter >=  zone_to_check->width)
+	if (orange_pixel_counter >=  zone_to_check->width)
 	{
 		printf("Orange button of context menu spotted\n");
-		printf("Orange pixels spotted : %d\n", context_menu_counter);
-		return 1;
+		printf("Orange pixels spotted : %d\n", orange_pixel_counter);
+		return orange_pixel_counter;
 	}
-	printf("Orange pixels spotted : %d, less than width : %d\n", context_menu_counter, zone_to_check->width);
-	return 0;
+	printf("Orange pixels spotted : %d, less than width : %d\n", orange_pixel_counter, zone_to_check->width);
+	return orange_pixel_counter;
 }
 
 int	ready_button_visible(WinManager *wm)
 {
-	Rectangle ready_button_zone = create_rectangle(1520, 800, 30, 4);
+	Rectangle ready_button_zone = create_rectangle(1520, 790, 100, 30);
 	XImage *ready_button_image = get_zone_to_check(wm, ready_button_zone);
 	printf("checking if in combat ...\n");
-	if (check_orange_context_menu_color(ready_button_image, 5) == 1)
+	if (check_orange_context_menu_color(ready_button_image, orange_button, 3) > 100)
 	{
 		printf("Ready button found\n");
 		return 1;
 	}
-	printf("Not in combat, keep fauching\n");
+	printf("COULD NOT SEE READY BUTTON, ASSUME YOU ARE NOT IN COMBAT MODE\n");
 	return 0;
 }
 
@@ -402,19 +400,13 @@ Point	find_player(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pixe
 	return player_pos;
 }
 
-Point	find_enemy(Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance)
+// this function will give accurate results only once the fight has started.
+Point	find_enemy(Rgb color_matrix[1080][1920], Rgb enemy_color, int pixel_pattern_length, int tolerance)
 {
-	Rgb enemy_color_pattern[20];
-	for (int i = 0; i < 20; i++)
-	{
-		enemy_color_pattern[i].r = 0;
-		enemy_color_pattern[i].g = 0;
-		enemy_color_pattern[i].b = 255;
-	}
 	Point enemy_pos;
 	int same_pattern_counter = 0;
 	bool match = false;
-	for (int y = 0; y  < 1080; y++)
+	for (int y = 0; y  < 770; y++)
 	{
 		for (int x = 0; x < 1920 - pixel_pattern_length; x++)
 		{
@@ -422,10 +414,9 @@ Point	find_enemy(Rgb color_matrix[1080][1920], int pixel_pattern_length, int tol
 			for (int i = 0; i < pixel_pattern_length; i++)
 			{
 				Rgb pixel = color_matrix[y][x+i];
-				Rgb ref = enemy_color_pattern[i];
-				if  (abs(pixel.r - ref.r) > tolerance
-				|| abs(pixel.g - ref. g) > tolerance
-				|| abs(pixel.b - ref.b) > tolerance)
+				if  (abs(pixel.r - enemy_color.r) > tolerance
+				|| abs(pixel.g - enemy_color. g) > tolerance
+				|| abs(pixel.b - enemy_color.b) > tolerance)
 				{
 					match = false;
 					break;
@@ -435,31 +426,25 @@ Point	find_enemy(Rgb color_matrix[1080][1920], int pixel_pattern_length, int tol
 			{
 				same_pattern_counter++;
 				enemy_pos.x = x;
-				enemy_pos.y = y;
+				enemy_pos.y = y + 60;
 			}
 		}
 	}
-	printf("FOUND A TOTAL OF %d PIXEL MATCHING ENEMY[BLUE] PATTERN ACROSS THE SCREEN\n", same_pattern_counter);
+	printf("FOUND A TOTAL OF %d MATCHING ENEMY PATTERN ACROSS THE SCREEN\n", same_pattern_counter);
 	if (same_pattern_counter < 1)
 	{
-		printf("COULD NOT FIND ANY ENEMY[BLUE] PATTERN MATCH\n");
+		printf("COULD NOT FIND ANY ENEMY MATCHING PATTERN MATCH\n");
 		return (Point){-1, -1};
 	}
 	printf("ENEMY POS: [%d, %d]\n", enemy_pos.x, enemy_pos.y);
 	return enemy_pos;
 }
 
-// on veut se rapprocher de lennemi le plus possible
-// autrement dit on veut diminuer la difference de position 
-// autrement dit si player.x = 500 et enemy.x = 1000 
-// on veut faire passer player.x de 500 a 1000 ou le pplus proche possible
-// comment on fait ?
-// on a notre pos et celle de l'enemi
-// deja on peut cliquer autour de notre joueur aleotoire,ent et regarder si la diff entre les x et y augmentent ou diminue.
-// si elle augmente on revient sur la pos d'avant et on ne ve pas plus sur cette pos
-// si elle baisse on 'sauvegarde cette pos en n1 des pos a aller
+// we have enemy pos and red square pos
+// for each red square, we do the difference with the enemy pos -> diff = enemypos - red_square
+// we will place on the smallest diff for that current redsquare
 
-int	placement(Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance, Point player_pos, Point enemy_pos)
+int	get_red_square_pos(Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance, Point player_pos, Point enemy_pos, Point red_square[])
 {
 	// on regarde les pattern rouge de 88 pixels qui se suivent
 	// une case rouge represente 88 pixels rouge a 255 0 0
@@ -497,6 +482,8 @@ int	placement(Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolera
 			}
 			if (match)
 			{
+				red_square[red_square_counter].x = x + (pixel_pattern_length / 2);
+				red_square[red_square_counter].y = y;
 				red_square_counter++;
 				red_square_pos.x = x + (pixel_pattern_length / 2);
 				red_square_pos.y = y;
@@ -511,11 +498,55 @@ int	placement(Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolera
 		return 1;
 	}
 	printf("RED SQUARE POS: [%d, %d]\n", red_square_pos.x, red_square_pos.y);
-	return 0;
+	return red_square_counter;
 }
 
-// on va print les cases : mais enft il ne faut pas return un Point mais un tableau de Point pour pouvoir travailler
-// sur chaque point 
+// this function will return the smallest distance between player enemy
+// it will go through each red square and do the difference with enemy x and y
+// it takes a list of red square,its size and the enemy position
+Point	find_closest_placement_to_enemy(Point red_square[], int size, Point enemy_pos)
+{
+	Point placement;
+	int distances[size]; 
+	int distance = 0;
+	printf("ENEMY POS : (%d, %d)\n", enemy_pos.x, enemy_pos.y);
+	int smallest_distance = 0;
+	for (int i = 0; i < size; i++)
+	{
+		distances[i] = abs(red_square[i].x - enemy_pos.x);
+		distances[i] += abs(red_square[i].y - enemy_pos.y);
+		if (distances[i] < distances[0])
+			{
+				distances[0] = distances[i];
+				smallest_distance = distances[0];
+				placement.x = red_square[i].x;
+				placement.y = red_square[i].y;
+			}
+	}
+	printf("SMALLEST DISTANCE BETWEEN PLAYER AND ENEMY LOCATED IN : (%d, %d)\n", placement.x, placement.y);
+	return placement;
+}
+
+// get current position of both player and enemy during the fight
+// do the difference
+// if enemy.x > player.x => move left
+// until enemy.x - player.x < 150
+// same for y
+// move_towards_enemy() will call get enemy pos and get player pos during the fight
+// at each call in will do the difference in the coordinates and move towards the enemy regarding x and y difference
+
+void	move_towards_enemy()
+{
+	Rgb color_matrix[1080][1920];
+	for (int y = 0; y  < 790; y++)
+	{
+		for (int x = 0; x < 1920 ; x++)
+		{
+			Rgb pixel = color_matrix[y][x];
+		}
+	}
+	Point player_pos = find_player(mandrage_color_pattern, color_matrix, 10, 5);
+}
 
 void open_inventory(WinManager *wm)
 {

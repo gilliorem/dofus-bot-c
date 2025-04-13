@@ -82,3 +82,37 @@ void	reap_wheat(WinManager* wm, int x, int y)
 	fake_click(wm, 1, True);
 	sleep(15);
 }
+
+void	place_player(WinManager *wm, Point placement)
+{
+	move_mouse(wm, placement.x, placement.y);
+	sleep(.5);
+	fake_click(wm, 1, True);
+}
+
+void	move_right(WinManager *wm, Point player_pos)
+{
+	move_mouse(wm, player_pos.x + 100, player_pos.y);
+	sleep(.5);
+	fake_click(wm, 1, True);
+}
+
+void	move_left(WinManager *wm, Point player_pos)
+{
+	move_mouse(wm, player_pos.x - 100, player_pos.y);
+	sleep(.5);
+	fake_click(wm, 1, True);
+}
+
+void	move_up(WinManager *wm, Point player_pos)
+{
+	move_mouse(wm, player_pos.x, player_pos.y - 50);
+	sleep(.5);
+	fake_click(wm, 1, True);
+}
+void	move_down(WinManager *wm, Point player_pos)
+{
+	move_mouse(wm, player_pos.x + 50, player_pos.y);
+	sleep(.5);
+	fake_click(wm, 1, True);
+}

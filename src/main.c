@@ -21,8 +21,17 @@ int	main(void)
 	XImage *pods_image = get_zone_to_check(wm, pods_zone);
 	XImage *image_zone = get_zone_to_check(wm, zone);
 	build_color_matrix(color_matrix, image_zone, zone);
-	
 
+/*	Point player = find_player(mandrage_color_pattern, color_matrix, 2, 1);
+	Point enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 9, 2);
+	Point red_square[256];
+	int red_square_counter = get_red_square_pos(color_matrix, 80, 2, player, enemy, red_square);
+	Point placement = find_closest_placement_to_enemy(red_square, red_square_counter, enemy);
+	place_player(wm, placement);
+*/
+	//move_towards_enemy();
+
+/*
 	while (1)
 	{
 		int cereals = compare_color_pattern(wm, hop_color_pattern, color_matrix, 5, 10);
@@ -30,7 +39,7 @@ int	main(void)
 			return 0;
 		check_orange_color_pods(wm, pods_image);
 	}
-
+*/
 /*
    	while(1)
 	{
@@ -43,9 +52,6 @@ int	main(void)
 */
 /*
 	printf("HELLO JEYDAL\n");
-	Point player = find_player(mandrage_color_pattern, color_matrix, 2, 1);
-	Point enemy = find_enemy(color_matrix, 20, 2);
-	placement(color_matrix, 90, 2, player, enemy);
 */
 	sleep(2);
 	XSync(wm->display, False);
