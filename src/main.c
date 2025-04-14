@@ -29,7 +29,8 @@ int	main(void)
 	Point placement = find_closest_placement_to_enemy(red_square, red_square_counter, enemy);
 	place_player(wm, placement);
 */
-	//move_towards_enemy();
+	move_towards_enemy(wm, color_matrix);
+	
 
 /*
 	while (1)

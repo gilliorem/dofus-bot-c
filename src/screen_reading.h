@@ -48,7 +48,7 @@ Point	find_player(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pixe
 Point	find_enemy(Rgb color_matrix[1080][1920],Rgb enemy_color, int pixel_pattern_length, int tolerance);
 int	get_red_square_pos(Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance, Point player_pos, Point enemy_pos, Point red_square[]);
 Point	find_closest_placement_to_enemy(Point red_square[], int size, Point enemy_pos);
-void	move_towards_enemy();
+void	move_towards_enemy(WinManager *wm, Rgb color_matrix[1080][1920]);
 
 
 #endif

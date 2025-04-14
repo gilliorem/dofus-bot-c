@@ -400,7 +400,6 @@ Point	find_player(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pixe
 	return player_pos;
 }
 
-// this function will give accurate results only once the fight has started.
 Point	find_enemy(Rgb color_matrix[1080][1920], Rgb enemy_color, int pixel_pattern_length, int tolerance)
 {
 	Point enemy_pos;
@@ -527,25 +526,58 @@ Point	find_closest_placement_to_enemy(Point red_square[], int size, Point enemy_
 	return placement;
 }
 
-// get current position of both player and enemy during the fight
-// do the difference
-// if enemy.x > player.x => move left
-// until enemy.x - player.x < 150
-// same for y
-// move_towards_enemy() will call get enemy pos and get player pos during the fight
-// at each call in will do the difference in the coordinates and move towards the enemy regarding x and y difference
-
-void	move_towards_enemy()
+void	move_towards_enemy(WinManager *wm, Rgb color_matrix[1080][1920])
 {
-	Rgb color_matrix[1080][1920];
-	for (int y = 0; y  < 790; y++)
+	Point player = find_player(mandrage_color_pattern, color_matrix, 2, 2);
+	Point enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 10, 2);
+	if (abs(player.x - enemy.x) > 50)
 	{
-		for (int x = 0; x < 1920 ; x++)
+		if (player.x > enemy.x)
 		{
-			Rgb pixel = color_matrix[y][x];
+			printf("PLAYER X IS SMALLER THAN ENEMY X : SO MOVE LEFT TO GET CLOSER TO ENEMY\n");
+			move_left(wm, player);
+			sleep(2);
+			Point player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
+			if (player.x == player_.x)
+			{
+				printf("PLAYER COULD NOT MOVE LEFT. TRY TO MOVE UP AND LEFT\n");
+				move_up_left(wm, player);
+			}
+			printf("Player has moved in (%d, %d)\n", player.x, player.y);
+		}
+		else if (player.x < enemy.x)
+		{
+			printf("PLAYER X IS BIGGER THAN ENEMY X : SO MOVE RIGHT TO GET CLOSER TO ENEMY\n");
+			move_right(wm, player);
+			sleep(2);
+			Point player = find_player(mandrage_color_pattern, color_matrix, 2, 2);
+			printf("Player has moved in (%d, %d)\n", player.x, player.y);
 		}
 	}
-	Point player_pos = find_player(mandrage_color_pattern, color_matrix, 10, 5);
+	if (abs(player.y - enemy.y) > 50)
+	{
+		if (player.y < enemy.y)
+		{
+			printf("PLAYER IS 'ABOVE' ENEMY: PLAYER MOVE DOWN TO GET CLOSER TO ENEMY\n");
+			move_down(wm, player);
+			sleep(2);
+			Point player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
+		}
+		else if (player.y > enemy.y)
+		{
+			printf("PLAYER IS 'BELOW' ENEMY: PLAYER MOVE UP TO GET CLOSER TO ENEMY\n");
+			move_up(wm, player);
+			sleep(2);
+			Point player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
+			if (player.y == player_.y)
+			{
+				printf("PLAYER COULD NOT MOVE UP, WILL TRY TO MOVE RIGHT UP\n");
+				move_up_right(wm, player);
+			}
+			printf("Player has moved in (%d, %d)\n", player.x, player.y);
+		}
+	}
+	printf("ENEMY IN RANGE: %dx %dy close\n", player.x - enemy.x, player.y - enemy.y);
 }
 
 void open_inventory(WinManager *wm)
