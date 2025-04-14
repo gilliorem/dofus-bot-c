@@ -42,7 +42,7 @@ int	test_match(WinManager *wm, Rgb *ref_pattern, Point pixel_match[], int size);
 int	compare_colors(XImage *zone_to_check_a, XImage *zone_to_check_b);
 void	open_inventory(WinManager *wm);
 void	close_inventory(WinManager *wm);
-int	check_orange_color_pods(WinManager *wm, XImage *zone_to_check);
+int	check_orange_color_pods(WinManager *wm);
 int	context_menu_visible(WinManager *wm, Point pixel_match[], int size);
 Point	find_player(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance);
 Point	find_enemy(Rgb color_matrix[1080][1920],Rgb enemy_color, int pixel_pattern_length, int tolerance);

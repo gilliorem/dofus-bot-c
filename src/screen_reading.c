@@ -526,59 +526,144 @@ Point	find_closest_placement_to_enemy(Point red_square[], int size, Point enemy_
 	return placement;
 }
 
-void	move_towards_enemy(WinManager *wm, Rgb color_matrix[1080][1920])
+
+int	check_movement_point(WinManager *wm)
 {
-	Point player = find_player(mandrage_color_pattern, color_matrix, 2, 2);
-	Point enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 10, 2);
-	if (abs(player.x - enemy.x) > 50)
+	Rectangle movement_point_zone = create_rectangle(1151, 893, 2, 1);
+	XImage movement_point_image = get_zone_to_check(wm, movement_point_zone);
+	Rgb zero_mp_color[3] = {{.r = 0, .g = 102, .b = 0}, {.r = 231, .g = 231, .b = 231}, {.r = 231, .g = 231, .b = 231}};
+	int zero_mp_counter = 0;
+	Rgb one_mp_color[3] = {{.r = 155, .g = 166, .b = 155}, {.r = 0, .g = 102, .b = 0}, {.r = 0, .g = 102, .b = 0}};
+	int one_mp_counter = 0;
+	Rgb two_mp_color[3] = {{.r = 0, .g = 102, .b = 0}, {.r = 231, .g = 231, .b = 231}, {.r = 0, .g = 102, .b = 0}};
+	int two_mp_counter = 0;
+	Rgb three_mp_color[3] = {{.r = 0, .g = 102, .b = 0}, {.r = 0, .g = 102, .b = 0}, {.r = 0, .g = 102, .b = 0}};
+	int three_mp_counter = 0;
+
+	for (int y = movement_point_zone.height; y < movement_point_zone.y; y++)
 	{
-		if (player.x > enemy.x)
+		for (int x = movement_point_zone.width; x < movement_point_zone.x; x++)
 		{
-			printf("PLAYER X IS SMALLER THAN ENEMY X : SO MOVE LEFT TO GET CLOSER TO ENEMY\n");
-			move_left(wm, player);
-			sleep(2);
-			Point player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
-			if (player.x == player_.x)
+			unsigned long pixel = XGetPixel(movement_point_image, i, j);
+			Rgb pixel_color = convert_pixel_to_rgb(movement_point_image, pixel);
+			for (int i = 0; i < 3; i++)
 			{
-				printf("PLAYER COULD NOT MOVE LEFT. TRY TO MOVE UP AND LEFT\n");
-				move_up_left(wm, player);
+				if (abs(pixel_color.r[x + i] - zero_mp_color[i]) < tolerance 
+				&& abs(pixel_color.g[x + i] - zero_mp_color[i]) < tolerance
+				&& abs(pixel_color.b[x + i] - zero_mp_color[i]) < tolerance)
+				{
+					zero_mp_counter++;
+					{
+						if (zero_mp_counter == 3)
+						{
+							printf("0 PM LEFT\n");
+							return 0;
+						}
+					}
+				}
+				else if (abs(pixel_color.r[x + i] - one_mp_color[i]) < tolerance 
+				&& abs(pixel_color.g[x + i] - one_mp_color[i]) < tolerance
+				&& abs(pixel_color.b[x + i] - one_mp_color[i]) < tolerance)
+				{
+					one_mp_counter++;
+					{
+						if (one_mp_counter == 3)
+						{
+							printf("1 PM LEFT\n");
+							return 1;
+						}
+					}
+				}
+				else if (abs(pixel_color.r[x + i] - two_mp_color[i]) < tolerance 
+				&& abs(pixel_color.g[x + i] - two_mp_color[i]) < tolerance
+				&& abs(pixel_color.b[x + i] - two_mp_color[i]) < tolerance)
+				{
+					two_mp_counter++;
+					{
+						if (two_mp_counter == 3)
+						{
+							printf("2 PM LEFT\n");
+							return 2;
+						}
+					}
+				}
+				else if (abs(pixel_color.r[x + i] - three_mp_color[i]) < tolerance 
+				&& abs(pixel_color.g[x + i] - three_mp_color[i]) < tolerance
+				&& abs(pixel_color.b[x + i] - three_mp_color[i]) < tolerance)
+				{
+					three_mp_counter++;
+					{
+						if (three_mp_counter == 3)
+						{
+							printf("3 PM LEFT\n");
+							return 3;
+						}
+					}
+				}
 			}
-			printf("Player has moved in (%d, %d)\n", player.x, player.y);
-		}
-		else if (player.x < enemy.x)
-		{
-			printf("PLAYER X IS BIGGER THAN ENEMY X : SO MOVE RIGHT TO GET CLOSER TO ENEMY\n");
-			move_right(wm, player);
-			sleep(2);
-			Point player = find_player(mandrage_color_pattern, color_matrix, 2, 2);
-			printf("Player has moved in (%d, %d)\n", player.x, player.y);
 		}
 	}
-	if (abs(player.y - enemy.y) > 50)
+	return -1;
+}
+
+void	move_towards_enemy(WinManager *wm, Rgb color_matrix[1080][1920])
+{
+	while (abs(player.x > enemy.x) > 50 || abs(player.y > enemy.y) > 50)
 	{
-		if (player.y < enemy.y)
+		Point player = find_player(mandrage_color_pattern, color_matrix, 2, 2);
+		Point enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 10, 2);
+		if (abs(player.x - enemy.x) > 50)
 		{
-			printf("PLAYER IS 'ABOVE' ENEMY: PLAYER MOVE DOWN TO GET CLOSER TO ENEMY\n");
-			move_down(wm, player);
-			sleep(2);
-			Point player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
-		}
-		else if (player.y > enemy.y)
-		{
-			printf("PLAYER IS 'BELOW' ENEMY: PLAYER MOVE UP TO GET CLOSER TO ENEMY\n");
-			move_up(wm, player);
-			sleep(2);
-			Point player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
-			if (player.y == player_.y)
+			if (player.x > enemy.x)
 			{
-				printf("PLAYER COULD NOT MOVE UP, WILL TRY TO MOVE RIGHT UP\n");
-				move_up_right(wm, player);
+				printf("PLAYER X IS SMALLER THAN ENEMY X : SO MOVE LEFT TO GET CLOSER TO ENEMY\n");
+				move_left(wm, player);
+				sleep(2);
+				Point player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
+				if (player.x == player_.x)
+				{
+					printf("PLAYER COULD NOT MOVE LEFT. TRY TO MOVE UP AND LEFT\n");
+					move_up_left(wm, player);
+				}
+				printf("Player has moved in (%d, %d)\n", player.x, player.y);
 			}
-			printf("Player has moved in (%d, %d)\n", player.x, player.y);
+			else if (player.x < enemy.x)
+			{
+				printf("PLAYER X IS BIGGER THAN ENEMY X : SO MOVE RIGHT TO GET CLOSER TO ENEMY\n");
+				move_right(wm, player);
+				sleep(2);
+				Point player = find_player(mandrage_color_pattern, color_matrix, 2, 2);
+				printf("Player has moved in (%d, %d)\n", player.x, player.y);
+			}
+		}
+		if (abs(player.y - enemy.y) > 50)
+		{
+			if (player.y < enemy.y)
+			{
+				printf("PLAYER IS 'ABOVE' ENEMY: PLAYER MOVE DOWN TO GET CLOSER TO ENEMY\n");
+				move_down(wm, player);
+				sleep(2);
+				Point player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
+			}
+			else if (player.y > enemy.y)
+			{
+				printf("PLAYER IS 'BELOW' ENEMY: PLAYER MOVE UP TO GET CLOSER TO ENEMY\n");
+				move_up(wm, player);
+				sleep(2);
+				Point player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
+				if (player.y == player_.y)
+				{
+					printf("PLAYER COULD NOT MOVE UP, WILL TRY TO MOVE RIGHT UP\n");
+					move_up_right(wm, player);
+				}
+				printf("Player has moved in (%d, %d)\n", player.x, player.y);
+			}
 		}
 	}
 	printf("ENEMY IN RANGE: %dx %dy close\n", player.x - enemy.x, player.y - enemy.y);
 }
+
+
 
 void open_inventory(WinManager *wm)
 {
@@ -596,11 +681,12 @@ void close_inventory(WinManager *wm)
 	sleep(1);
 }
 
-int	check_orange_color_pods(WinManager *wm, XImage *zone_to_check)
+int	check_orange_color_pods(WinManager *wm)
 {
+	Rectangle full_pods_zone = create_rectangle(1226, 482, 10, 4);
+	XImage *pods_zone_image = get_zone_to_check(wm, pods_zone);
 	int orange_counter = 0;
 	int tolerance = 5;
-	open_inventory(wm);
 	for (int i = 0; i < zone_to_check->height ; i++)
 	{
 		for (int j = 0; j < zone_to_check->width ; j++)
@@ -621,7 +707,6 @@ int	check_orange_color_pods(WinManager *wm, XImage *zone_to_check)
 	else
 	{
 		printf("pas encore full pods\n");
-		close_inventory(wm);
 	}
 	return 0;
 }
