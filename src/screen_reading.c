@@ -80,30 +80,6 @@ XImage	*get_zone_to_check(WinManager *wm, Rectangle rectangle)
 	return zone_to_check;
 }
 
-XImage	**get_nzone(WinManager *wm, int n)
-{
-	XImage **zones_to_check = malloc(n * sizeof(XImage*));
-	int x = 300;
-	int y = 250;
-	unsigned int width = 10;
-	unsigned int height = 10;
-	Rectangle rectangle[n];
-	for (int i = 0; i < n; i++)
-	{
-		rectangle[i] = create_rectangle(x, y, width, height);
-		printf("Rectangle %d: x=%d y=%d w=%u h=%u\n", i, rectangle[i].x, rectangle[i].y, rectangle[i].width, rectangle[i].height);
-		x+=300;
-		y+=250;
-		zones_to_check[i] = get_zone_to_check(wm, rectangle[i]);
-		if (zones_to_check[i] == NULL)
-		{
-			printf("COULD NOT ALLOCATE MEM AT IMAGE %d\n", i);
-			return NULL;
-		}
-	}
-	return zones_to_check;
-}
-
 int	get_bit_shift(unsigned long color_mask)
 {
 	int shift = 0;
@@ -254,46 +230,10 @@ Rgb*	 get_color_sequence(WinManager *wm, Rectangle zone_r)
 	Rgb *wheat_color_sequence;
 	XImage *wheat_zone = get_zone_to_check(wm, zone_r);
 	wheat_color_sequence = get_color_in_frame(wm, wheat_zone);
-
 	sleep(4);
 	XSync(wm->display, False);
 	printf("---------------------\n");
-
 	return wheat_color_sequence;
-}
-
-int	is_wheat(WinManager *wm, Rgb wheat, XImage *zone, Rectangle r_zone)
-{
-	int wheat_match_counter = 0;
-	int tolerance = 10;
-	int wheat_pixel_x = 0;
-	int wheat_pixel_y = 0;
-	for (int i = 0; i < zone->height; i++)
-		for (int j = 0; j < zone->width; j++)
-		{
-			unsigned long pixel = XGetPixel(zone, j, i);
-			Rgb pixel_color = convert_pixel_to_rgb(zone, pixel);
-			printf("(%d, %d:", r_zone.x + j, r_zone.y + i);
-			if (abs(wheat.r - pixel_color.r) < tolerance &&
-			abs(wheat.r - pixel_color.r) < tolerance &&
-			abs(wheat.r - pixel_color.r) < tolerance)
-			{
-				wheat_match_counter++;
-				wheat_pixel_x = r_zone.x + j;
-				wheat_pixel_y = r_zone.y + i;
-				printf("pixel color match with wheat color\n");
-			}
-		}
-	if (wheat_match_counter > 40)
-	{
-		printf("IT LOOKS LIKE WE FOUND WHEAT at (%d, %d)\n", r_zone.x, r_zone.y);
-		reap_wheat(wm, wheat_pixel_x, wheat_pixel_y-50);
-	}
-	else
-		printf("NO WHEAT FOUND IN ZONE\n");
-	sleep(2);
-		printf("WHEAT COUNTER : %d\n", wheat_match_counter);
-		return 1;
 }
 
 void	build_color_matrix(Rgb color_matrix[1080][1920], XImage *pixel_zone, Rectangle zone)
@@ -313,51 +253,49 @@ void	build_color_matrix(Rgb color_matrix[1080][1920], XImage *pixel_zone, Rectan
 	}
 }
 
-int	 compare_color_pattern(WinManager *wm, Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance)
+bool	pattern_match(Rgb color_matrix[1080][1920], Rgb *ref_color_pattern, int pattern_length, int x, int y, int tolerance)
 {
-	int same_pattern_count = 0;
-	bool match_found = false;
+	bool matching_pattern = true;
+	for (int i = 0; i < pattern_length; i++)
+	{
+		Rgb color = color_matrix[y][x + i];
+		Rgb ref = ref_color_pattern[i];
+		if (abs(color.r - ref.r) > tolerance ||
+		abs(color.g - ref.g) > tolerance ||
+		abs(color.b - ref.b) > tolerance)
+		{
+			matching_pattern = false;
+			break;
+		}
+	}
+	return matching_pattern;
+}
+
+
+int	find_matching_pattern(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pattern_length, int tolerance, Point matches[216])
+{
+	int	match_counter = 0;
 	for (int y = 0; y < 1080; y++)
 	{
-		for (int x = 0; x < 1920 - pixel_pattern_length; x++)
+		for (int x = 0; x < 1920 - pattern_length; x++)
 		{
-			match_found = true;
-			for (int i = 0; i < pixel_pattern_length; i++)
+			if (pattern_match(color_matrix, ref_color_pattern, pattern_length, x, y, tolerance))
 			{
-				Rgb pixel = color_matrix[y][x + i];
-				Rgb ref = ref_color_pattern[i];
-				if (abs(pixel.r - ref.r) > tolerance ||
-				abs(pixel.g - ref.g) > tolerance ||
-				abs(pixel.b - ref.b) > tolerance)
-				{
-					match_found = false;
-					break;
-				}
-			}
-			if (match_found)
-			{
-				same_pattern_count++;
-				printf("(%d, %d): PIXEL MATCH\n", x, y);
-				reap_wheat(wm, x, y);
-				if (ready_button_visible(wm) == 1)
-					return 1;
+				match_counter++;
+				matches[match_counter].x = x;
+				matches[match_counter].y = y;
 			}
 		}
-	
 	}
-	printf("FOUND %d cereal matching pattern across the map\n", same_pattern_count);
-	for (int i = 0; i < 2; i++)
-		if (same_pattern_count < 1)
-		{
-			if (i == 1)
-			{
-				printf("could not found cereals twice, need to change map\n");
-				return 0;
-			}
-			printf("didnt find matching cereals pattern, waiting 60sec\n");
-			sleep(60);
-		}
-	return same_pattern_count;
+	return match_counter;
+}
+
+
+void	print_matching_pattern_position(int size, Point matches[size])
+{
+	for (int i = 1; i < size; i++)
+		printf("Matching pattern : %d %d\n", matches[i].x, matches[i].y);
+		//reap_wheat(wm, matches[i].x, matches[i].y);
 }
 
 Point	find_player(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance)
@@ -439,15 +377,8 @@ Point	find_enemy(Rgb color_matrix[1080][1920], Rgb enemy_color, int pixel_patter
 	return enemy_pos;
 }
 
-// we have enemy pos and red square pos
-// for each red square, we do the difference with the enemy pos -> diff = enemypos - red_square
-// we will place on the smallest diff for that current redsquare
-
 int	get_red_square_pos(Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance, Point player_pos, Point enemy_pos, Point red_square[])
 {
-	// on regarde les pattern rouge de 88 pixels qui se suivent
-	// une case rouge represente 88 pixels rouge a 255 0 0
-	// donc si on veut se mettre au milieu on se met a 44 px.
 	Rgb red_square_color_pattern[pixel_pattern_length];
 	int red_square_counter = 0;
 	bool match = false;
@@ -527,10 +458,10 @@ Point	find_closest_placement_to_enemy(Point red_square[], int size, Point enemy_
 }
 
 
-int	check_movement_point(WinManager *wm)
+int	check_movement_point(WinManager *wm, int tolerance)
 {
 	Rectangle movement_point_zone = create_rectangle(1151, 893, 2, 1);
-	XImage movement_point_image = get_zone_to_check(wm, movement_point_zone);
+	XImage* movement_point_image = get_zone_to_check(wm, movement_point_zone);
 	Rgb zero_mp_color[3] = {{.r = 0, .g = 102, .b = 0}, {.r = 231, .g = 231, .b = 231}, {.r = 231, .g = 231, .b = 231}};
 	int zero_mp_counter = 0;
 	Rgb one_mp_color[3] = {{.r = 155, .g = 166, .b = 155}, {.r = 0, .g = 102, .b = 0}, {.r = 0, .g = 102, .b = 0}};
@@ -544,13 +475,13 @@ int	check_movement_point(WinManager *wm)
 	{
 		for (int x = movement_point_zone.width; x < movement_point_zone.x; x++)
 		{
-			unsigned long pixel = XGetPixel(movement_point_image, i, j);
+			unsigned long pixel = XGetPixel(movement_point_image, x, y);
 			Rgb pixel_color = convert_pixel_to_rgb(movement_point_image, pixel);
 			for (int i = 0; i < 3; i++)
 			{
-				if (abs(pixel_color.r[x + i] - zero_mp_color[i]) < tolerance 
-				&& abs(pixel_color.g[x + i] - zero_mp_color[i]) < tolerance
-				&& abs(pixel_color.b[x + i] - zero_mp_color[i]) < tolerance)
+				if (abs(pixel_color.r - zero_mp_color[i].r) < tolerance 
+				&& abs(pixel_color.g - zero_mp_color[i].g) < tolerance
+				&& abs(pixel_color.b - zero_mp_color[i].b) < tolerance)
 				{
 					zero_mp_counter++;
 					{
@@ -561,9 +492,9 @@ int	check_movement_point(WinManager *wm)
 						}
 					}
 				}
-				else if (abs(pixel_color.r[x + i] - one_mp_color[i]) < tolerance 
-				&& abs(pixel_color.g[x + i] - one_mp_color[i]) < tolerance
-				&& abs(pixel_color.b[x + i] - one_mp_color[i]) < tolerance)
+				else if (abs(pixel_color.r - one_mp_color[i].r) < tolerance 
+				&& abs(pixel_color.g - one_mp_color[i].g) < tolerance
+				&& abs(pixel_color.b - one_mp_color[i].b) < tolerance)
 				{
 					one_mp_counter++;
 					{
@@ -574,9 +505,9 @@ int	check_movement_point(WinManager *wm)
 						}
 					}
 				}
-				else if (abs(pixel_color.r[x + i] - two_mp_color[i]) < tolerance 
-				&& abs(pixel_color.g[x + i] - two_mp_color[i]) < tolerance
-				&& abs(pixel_color.b[x + i] - two_mp_color[i]) < tolerance)
+				else if (abs(pixel_color.r - two_mp_color[i].r) < tolerance 
+				&& abs(pixel_color.g - two_mp_color[i].g) < tolerance
+				&& abs(pixel_color.b - two_mp_color[i].b) < tolerance)
 				{
 					two_mp_counter++;
 					{
@@ -587,9 +518,9 @@ int	check_movement_point(WinManager *wm)
 						}
 					}
 				}
-				else if (abs(pixel_color.r[x + i] - three_mp_color[i]) < tolerance 
-				&& abs(pixel_color.g[x + i] - three_mp_color[i]) < tolerance
-				&& abs(pixel_color.b[x + i] - three_mp_color[i]) < tolerance)
+				else if (abs(pixel_color.r - three_mp_color[i].r) < tolerance 
+				&& abs(pixel_color.g - three_mp_color[i].g) < tolerance
+				&& abs(pixel_color.b - three_mp_color[i].b) < tolerance)
 				{
 					three_mp_counter++;
 					{
@@ -605,228 +536,3 @@ int	check_movement_point(WinManager *wm)
 	}
 	return -1;
 }
-
-void	move_towards_enemy(WinManager *wm, Rgb color_matrix[1080][1920])
-{
-	while (abs(player.x > enemy.x) > 50 || abs(player.y > enemy.y) > 50)
-	{
-		Point player = find_player(mandrage_color_pattern, color_matrix, 2, 2);
-		Point enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 10, 2);
-		if (abs(player.x - enemy.x) > 50)
-		{
-			if (player.x > enemy.x)
-			{
-				printf("PLAYER X IS SMALLER THAN ENEMY X : SO MOVE LEFT TO GET CLOSER TO ENEMY\n");
-				move_left(wm, player);
-				sleep(2);
-				Point player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
-				if (player.x == player_.x)
-				{
-					printf("PLAYER COULD NOT MOVE LEFT. TRY TO MOVE UP AND LEFT\n");
-					move_up_left(wm, player);
-				}
-				printf("Player has moved in (%d, %d)\n", player.x, player.y);
-			}
-			else if (player.x < enemy.x)
-			{
-				printf("PLAYER X IS BIGGER THAN ENEMY X : SO MOVE RIGHT TO GET CLOSER TO ENEMY\n");
-				move_right(wm, player);
-				sleep(2);
-				Point player = find_player(mandrage_color_pattern, color_matrix, 2, 2);
-				printf("Player has moved in (%d, %d)\n", player.x, player.y);
-			}
-		}
-		if (abs(player.y - enemy.y) > 50)
-		{
-			if (player.y < enemy.y)
-			{
-				printf("PLAYER IS 'ABOVE' ENEMY: PLAYER MOVE DOWN TO GET CLOSER TO ENEMY\n");
-				move_down(wm, player);
-				sleep(2);
-				Point player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
-			}
-			else if (player.y > enemy.y)
-			{
-				printf("PLAYER IS 'BELOW' ENEMY: PLAYER MOVE UP TO GET CLOSER TO ENEMY\n");
-				move_up(wm, player);
-				sleep(2);
-				Point player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
-				if (player.y == player_.y)
-				{
-					printf("PLAYER COULD NOT MOVE UP, WILL TRY TO MOVE RIGHT UP\n");
-					move_up_right(wm, player);
-				}
-				printf("Player has moved in (%d, %d)\n", player.x, player.y);
-			}
-		}
-	}
-	printf("ENEMY IN RANGE: %dx %dy close\n", player.x - enemy.x, player.y - enemy.y);
-}
-
-
-
-void open_inventory(WinManager *wm)
-{
-	move_mouse(wm, 1322, 886);
-	sleep(1);
-	fake_click(wm, 1, true);
-	sleep(1);
-}
-
-void close_inventory(WinManager *wm)
-{
-	move_mouse(wm, 1629, 122);
-	sleep(1);
-	fake_click(wm, 1, true);
-	sleep(1);
-}
-
-int	check_orange_color_pods(WinManager *wm)
-{
-	Rectangle full_pods_zone = create_rectangle(1226, 482, 10, 4);
-	XImage *pods_zone_image = get_zone_to_check(wm, pods_zone);
-	int orange_counter = 0;
-	int tolerance = 5;
-	for (int i = 0; i < zone_to_check->height ; i++)
-	{
-		for (int j = 0; j < zone_to_check->width ; j++)
-		{
-			unsigned long pixel = XGetPixel(zone_to_check, j, i);
-			Rgb rgb = convert_pixel_to_rgb(zone_to_check, pixel);
-			if (abs(rgb.r - orange_button.r) < tolerance
-			&& abs(rgb.g - orange_button.g) < tolerance
-			&& abs(rgb.b - orange_button.b) < tolerance)
-				orange_counter++;
-		}
-	}
-	if (orange_counter > 5)
-	{
-		printf("FULL PODS\n");
-		return 1;
-	}
-	else
-	{
-		printf("pas encore full pods\n");
-	}
-	return 0;
-}
-
-
-
-/*
-int	test_match(WinManager *wm, Rgb *ref_color_pattern, Point pixel_match[], int size)
-{
-	int context_menu_counter = 0;
-	int context_menu_hover = 0; 
-	Rgb color_matrix[1920][1080];
-	for (int i = 0; i < size; i+=10)
-	{
-		move_mouse(wm, pixel_match[i].x, pixel_match[i].y);
-		sleep(.3);
-		fake_click(wm, 1, true);
-		sleep(.3);
-		context_menu_counter = compare_colors(ref_color_pattern, color_matrix, 3, pixel_match[size]);
-		context_menu_counter += compare_colors(ref_color_pattern, color_matrix, 3, pixel_match[size]);
-		if (context_menu_counter > 4)
-			{
-				move_mouse(wm, pixel_match[i].x + 50, pixel_match[i].y + 75);
-				context_menu_hover = compare_colors(context_menu_orange, color_matrix[1920][1080], 3, pixel_match[size]);
-				if (context_menu_hover > 2)
-				{
-					sleep(.5);
-					fake_click(wm, 1, true);
-					sleep(8);
-				}
-			}
-	}
-	return 0;
-}
-*/
-
-int	compare_colors(XImage *zone_to_check_a, XImage *zone_to_check_b)
-{
-	int same_frame = 0;
-	int tolerance = 10;
-	int match_counter = 0;
-	for (int i = 0; i < zone_to_check_a->height; i++)
-	{
-		for (int j = 0; j < zone_to_check_a->width ; j++)
-		{
-			unsigned long pixel_a = XGetPixel(zone_to_check_a, j, i);
-			unsigned long pixel_b = XGetPixel(zone_to_check_b, j, i);
-			Rgb rgb_a = convert_pixel_to_rgb(zone_to_check_a, pixel_a);
-			Rgb rgb_b = convert_pixel_to_rgb(zone_to_check_b, pixel_b);
-			printf("(%d, %d): R%d G%d B%d %ld\n",
-			(j), (i), rgb_a.r, rgb_a.g, rgb_a.b, pixel_a);
-			printf("(%d, %d): R%d G%d B%d %ld\n",
-			(j), (i), rgb_b.r, rgb_b.g, rgb_b.b, pixel_b);
-			if (abs(rgb_a.r - rgb_b.r) < tolerance &&
-			abs(rgb_a.g - rgb_b.g) < tolerance &&
-			abs(rgb_a.b - rgb_b.b) < tolerance)
-			{
-				match_counter++;
-				printf("PIXEL MATCH\n");
-			}
-			else
-				printf("PIXEL DOES NOT MATCH\n");
-		}
-	}
-	if (match_counter < 90)
-	{
-		printf("FRAMES DONT MATCH\n");
-		return 1;
-	}
-	else
-	{
-		printf("FRAMES MATCH\n");
-		return 0;
-	}
-}
-
-int	check_frame(WinManager *wm)
-{
-	//zones ble 1 en 5, -24
-	Rectangle r_a = create_rectangle(400, 166, 2, 3);
-	Rgb *colors_zone_one;
-	XImage *zone_one_frame_one = get_zone_to_check(wm, r_a);
-	printf("COLORS IN FRAME 1 ZONE 1:\n");
-	colors_zone_one = get_color_in_frame(wm, zone_one_frame_one);
-
-	sleep(4);
-	XSync(wm->display, False);
-	printf("---------------------\n");
-
-	/*
-	Rectangle r_b = create_rectangle(1100, 600, 300, 400);
-	Rgb *colors_zone_two;
-	XImage *zone_two_frame_one = get_zone_to_check(wm, r_b);
-	printf("COLORS IN FRAME 1 ZONE 2:\n");
-	colors_zone_two = get_color_in_frame(wm, zone_two_frame_one);
-	*/
-	//compare_colors(zone_one_frame_one, zone_one_frame_two);
-	// can return 0 1 2 3 according to the current frame we are
-	return 0;
-}
-
-int	log_in(WinManager *wm)
-{
-	Rectangle orange_r = create_rectangle(1000, 650, 100, 20);
-	XImage *orange_button_zone = get_zone_to_check(wm, orange_r);
-	Rectangle log_r = create_rectangle(600, 500, 10, 10);
-	XImage *log_zone = get_zone_to_check(wm, log_r);
-	if (check_orange_color(orange_button_zone) == 1)
-		click_orange_button(wm);
-	else if (check_log_in(log_zone) == 1)
-		click_log_button(wm);
-		
-	sleep(1);
-	start(wm);
-	// check_zone_pour voir si en jeu
-	return 0;
-}
-
-// releve la couleur recherche sur la zone
-// on peut faire un carre de 10*10 
-// si la couleur correspond a la couleur du ble 
-// click sur les coordonnes (x y)
-// sinon en deduire la current frame

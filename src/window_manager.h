@@ -5,6 +5,7 @@
 #include "types.h"
 
 WinManager	*setXConnection(void);
+WinManager	*init_bot(void);
 void	get_window_name(WinManager *wm);
 // TO DO : turn those 2 func into one using recursion.
 void	get_subwindows(WinManager *wm);

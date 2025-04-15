@@ -7,9 +7,7 @@
 
 int	main(void)
 {
-	WinManager *wm = setXConnection();
-	if (!wm) return 1;
-	Point p;
+	WinManager *wm = init_bot();
 
 	//log_in(wm);
 	//sleep(5);
@@ -26,18 +24,12 @@ int	main(void)
 	Point placement = find_closest_placement_to_enemy(red_square, red_square_counter, enemy);
 	place_player(wm, placement);
 */
-	move_towards_enemy(wm, color_matrix);
+//	move_towards_enemy(wm, color_matrix);
 	
 
-/*
-	while (1)
-	{
-		int cereals = compare_color_pattern(wm, hop_color_pattern, color_matrix, 5, 10);
-		if (cereals < 1)
-			return 0;
-		check_orange_color_pods(wm, pods_image);
-	}
-*/
+	Point matches[216];
+	int size = find_matching_pattern(oat_color_pattern, color_matrix, 3, 8, matches);
+	print_matching_pattern_position(size, matches);
 	sleep(2);
 	XSync(wm->display, False);
 	return (0);

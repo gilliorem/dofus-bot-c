@@ -21,9 +21,20 @@ WinManager	*setXConnection(void)
 	else
 		printf("X11 connection established.\n");
 	wm->root = XDefaultRootWindow(wm->display);
-	
 	return (wm);
 }
+
+WinManager	*init_bot()
+{
+	WinManager *wm = setXConnection();
+	if (!wm) 
+	{
+		printf("COUL NOT MAKE THE CONNECTION WITH X SERVER\n");
+		return NULL;
+	}
+	return (wm);
+}
+
 void 	get_window_name(WinManager *wm)
 {
 	Window root_return, parent_return;
