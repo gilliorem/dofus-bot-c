@@ -4,7 +4,9 @@
 #include "mouse_manager.h"
 #include "window_manager.h"
 
+int	check_weapon(WinManager *wm);
 void	equip_weapon(WinManager *wm);
+int	check_tactical_mode(WinManager *wm);
 void	tactical_mode(WinManager *wm);
 void	place_player(WinManager *wm, Point placement);
 void	click_ready_button(WinManager *wm);

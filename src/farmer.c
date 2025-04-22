@@ -1,5 +1,6 @@
 #include "mouse_manager.h"
 #include "screen_reading.h"
+#include <stdlib.h>
 
 void	equip_faux(WinManager *wm)
 {
@@ -10,12 +11,20 @@ void	equip_faux(WinManager *wm)
 	XSync(wm->display, False);
 }
 
-void open_inventory(WinManager *wm)
+int open_inventory(WinManager *wm)
 {
-	move_mouse(wm, 1322, 886);
+	Rgb ref = {.r = 131, .g = 82, .b = 1};
+	int tolerance = 5;
+	Rectangle inventory_r = create_rectangle(1314, 884, 1, 1);
+	XImage *inventory_image = get_zone_to_check(wm, inventory_r);
+	Rgb* inventory_color = get_color_in_frame(wm, inventory_image);
+	if (abs(ref.r - inventory_color->r) > tolerance)
+		return 1;
+	move_mouse(wm, 1314, 884);
 	sleep(1);
 	fake_click(wm, 1, true);
 	sleep(1);
+	return 0;
 }
 
 void close_inventory(WinManager *wm)

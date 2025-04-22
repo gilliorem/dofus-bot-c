@@ -1,3 +1,4 @@
+#include "log.h"
 #include "window_manager.h"
 #include "mouse_manager.h"
 #include "screen_reading.h"
@@ -7,7 +8,8 @@
 void	run()
 {
 	WinManager *wm = init_bot();
-//	log_in(wm);
+	if (log_in(wm) == 0)
+		return;
 	Rgb color_matrix[1080][1920];
 	build_color_matrix(wm, color_matrix);
 	while (1)	

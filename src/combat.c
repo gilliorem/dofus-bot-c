@@ -3,15 +3,56 @@
 #include <stdlib.h>
 #include "types.h"
 
+//ajouter un check pour voir si l'arme est deja equipee
+int	check_weapon(WinManager *wm)
+{
+	Rgb ref = {.r = 255, .g = 255, .b = 255};
+	int tolerance = 5;
+	Rectangle weapon_zone = create_rectangle(1274, 968, 1, 1);
+	XImage *weapon_image = get_zone_to_check(wm, weapon_zone);
+	printf("%d\n", weapon_image->height);
+	unsigned long pixel = XGetPixel(weapon_image, 1, 1);
+	Rgb weapon_color = convert_pixel_to_rgb(weapon_image, pixel);
+	if (abs(ref.r - weapon_color.r) > tolerance)
+		{
+			printf("Faux is not equip\n");
+			return 1;
+		}
+	printf("Faux is equiped\n");
+	return 0;
+}
+
 void	equip_weapon(WinManager *wm)
 {
+	if (check_weapon(wm) == 0)
+		return;
 	move_mouse(wm, 1340, 975);
 	sleep(.5);
 	double_click(wm);
 }
 
+// in order to check if still in combat mode can check the pixel in 1080, 1025 (white flage)
+
+int	check_tactical_mode(WinManager *wm)
+{
+	Rgb ref = {.r = 0, .g = 153, .b = 0};
+	int tolerance = 5;
+	Rectangle tactical_zone = create_rectangle(1533, 754, 1, 1);
+	XImage *tactical_image = get_zone_to_check(wm, tactical_zone);
+	Rgb* tactical_color = get_color_in_frame(wm, tactical_image);
+	if (abs(ref.r - tactical_color->r) > tolerance)
+		{
+			printf("Tactical mode is OFF.\n");
+			return 1;
+		}
+	printf("Tactical mode is ON\n");
+	return 0;
+}
+
 void	tactical_mode(WinManager *wm)
 {
+	if (check_tactical_mode(wm) == 0)
+		return;
 	move_mouse(wm, 1500, 760);
 	sleep(.5);
 	fake_click(wm, 1, True);

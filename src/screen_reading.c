@@ -179,6 +179,17 @@ int	check_orange_context_menu_color(XImage *zone_to_check, Rgb orange_button, in
 	return orange_pixel_counter;
 }
 
+int	check_in_game(WinManager *wm)
+{
+	Rgb ref = {.r = 131, .g = 82, .b = 1};
+	int tolerance = 5;
+	Rectangle inventory_r = create_rectangle(1314, 884, 1, 1);
+	XImage *inventory_image = get_zone_to_check(wm, inventory_r);
+	Rgb* inventory_color = get_color_in_frame(wm, inventory_image);
+	if (abs(ref.r - inventory_color->r) > tolerance)
+		return 1;
+}
+
 int	ready_button_visible(WinManager *wm)
 {
 	Rectangle ready_button_zone = create_rectangle(1520, 790, 100, 30);

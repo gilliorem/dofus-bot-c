@@ -16,13 +16,8 @@ int	main(void)
 	WinManager *wm = init_bot();
 	Rgb color_matrix[1080][1920];
 	build_color_matrix(wm, color_matrix);
-	while (1)
-	{
-		if (reap_wheat(wm, color_matrix) == 1)
-			break;
-	}
-	equip_weapon(wm);
-	// il faut check le tactimal mode avant de l'activer (p-e) m pas utile car jamais de check cases combat grises
+	check_weapon(wm);
+/*
 	tactical_mode(wm);
 	Point player_pos = find_player(mandrage_color_pattern, color_matrix, 3, 3);
 	Point enemy_pos = find_enemy(color_matrix, scarecrow_hat_dark_brown, 5, 3);
@@ -31,7 +26,7 @@ int	main(void)
 	player_pos = find_closest_placement_to_enemy(red_square, red_squares, enemy_pos);
 	place_player(wm, player_pos);
 
-/*	Point player = find_player(mandrage_color_pattern, color_matrix, 2, 1);
+	Point player = find_player(mandrage_color_pattern, color_matrix, 2, 1);
 	Point enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 9, 2);
 	Point red_square[256];
 	int red_square_counter = get_red_square_pos(color_matrix, 80, 2, player, enemy, red_square);
