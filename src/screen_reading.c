@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "screen_reading.h"
-#include "event_handler.h"
+#include "mouse_manager.h"
 #include "window_manager.h"
 
 Rgb orange_button = {.r = 255, .g = 102, .b = 0};
+Rgb ok_orange_button = {.r = 255, .g = 97, .b = 0};
 Rgb log_in_button = {.r = 242, .g = 146, .b = 0};
 Rgb wheat = {.r = 56, .g = 62, .b = 15};
 
@@ -27,10 +28,11 @@ Rgb context_menu_dark_gray[3] = {
 	{.r = 81, .g = 74, .b = 60}
 };
 
-Rgb wheat_color_pattern[3] = {
-	{.r = 175, .g = 143, .b = 22},
-	{.r = 171, .g = 114, .b = 21},
-	{.r = 185, .g = 127, .b = 42},
+Rgb wheat_color_pattern[4] = {
+	{.r = 169, .g = 122, .b = 24},
+	{.r = 161, .g = 101, .b = 4},
+	{.r = 168, .g = 107, .b = 9},
+	{.r = 176, .g = 125, .b = 18}
 };
 
 Rgb barley_color_pattern[3] = {
@@ -150,34 +152,6 @@ int	check_log_in(XImage *zone_to_check)
 	return 0;
 }
 
-
-int	check_orange_color(XImage *zone_to_check)
-{
-	int orange_counter = 0;
-	int tolerance = 5;
-	for (int i = 0; i < zone_to_check->height ; i++)
-	{
-		for (int j = 0; j < zone_to_check->width ; j++)
-		{
-			unsigned long pixel = XGetPixel(zone_to_check, j, i);
-			Rgb rgb = convert_pixel_to_rgb(zone_to_check, pixel);
-			if (abs(rgb.r - orange_button.r) < tolerance
-			&& abs(rgb.g - orange_button.g) < tolerance
-			&& abs(rgb.b - orange_button.b) < tolerance)
-				orange_counter++;
-		}
-	}
-	if (orange_counter > 30)
-	{
-		printf("%d ORANGE PIXELS\n", orange_counter);
-		printf("ORANGE BUTTON IN ZONE\n");
-		return 1;
-	}
-	else
-		printf("No button\n");
-	return 0;
-}
-
 int	check_orange_context_menu_color(XImage *zone_to_check, Rgb orange_button, int tolerance)
 {
 	int orange_pixel_counter = 0;
@@ -185,29 +159,23 @@ int	check_orange_context_menu_color(XImage *zone_to_check, Rgb orange_button, in
 	{
 		for (int i = 0; i < zone_to_check->width; i++)
 		{
-			unsigned pixel = XGetPixel(zone_to_check, j, i);
+			unsigned long pixel = XGetPixel(zone_to_check, j, i);
 			Rgb rgb = convert_pixel_to_rgb(zone_to_check, pixel);
 			if (abs(rgb.r - orange_button.r) > tolerance
 			|| abs(rgb.g - orange_button.g) > tolerance
 			|| abs(rgb.b - orange_button.b) > tolerance)
 			{
-				printf("COULD NOT FIND ORANGE CONTEXT MENU COLOR\n");
 				break;
 			}
 			else
 			{
 				orange_pixel_counter++;
-				printf("+1 ORANGE VISIBLE\n");
+				printf("(%d, %d): %d, %d, %d %ld\n",
+						(j), (i), rgb.r, rgb.g, rgb.b, pixel);
 			}
 		}
 	}
-	if (orange_pixel_counter >=  zone_to_check->width)
-	{
-		printf("Orange button of context menu spotted\n");
-		printf("Orange pixels spotted : %d\n", orange_pixel_counter);
-		return orange_pixel_counter;
-	}
-	printf("Orange pixels spotted : %d, less than width : %d\n", orange_pixel_counter, zone_to_check->width);
+	printf("Orange pixels spotted : %d\n", orange_pixel_counter);
 	return orange_pixel_counter;
 }
 
@@ -225,29 +193,57 @@ int	ready_button_visible(WinManager *wm)
 	return 0;
 }
 
+int	ok_button_visible(WinManager *wm)
+{
+	Rectangle ok_button_zone = create_rectangle(900, 477, 200, 50);
+	XImage *ok_button_image = get_zone_to_check(wm, ok_button_zone);
+	if (check_orange_context_menu_color(ok_button_image, ok_orange_button, 3) > 100)
+	{
+		printf("OK BUTTON found\n");
+		return 1;
+	}
+	printf("COULD NOT SEE OK BUTTON keep fauching!\n");
+	return 0;
+}
+
+int	full_pods(WinManager *wm)
+{
+	Rectangle pods_bar_zone = create_rectangle(1224, 469, 16, 18);
+	XImage *pods_bar_image = get_zone_to_check(wm, pods_bar_zone);
+	if (check_orange_context_menu_color(pods_bar_image, orange_button, 3) > 100)
+	{
+		printf("FULL PODS\n");
+		return 1;
+	}
+	printf("NOT FULL PODS YET, Keep fauching\n");
+	return 0;
+}
+
 Rgb*	 get_color_sequence(WinManager *wm, Rectangle zone_r)
 {
-	Rgb *wheat_color_sequence;
-	XImage *wheat_zone = get_zone_to_check(wm, zone_r);
-	wheat_color_sequence = get_color_in_frame(wm, wheat_zone);
+	Rgb *color_sequence;
+	XImage *image_zone = get_zone_to_check(wm, zone_r);
+	color_sequence = get_color_in_frame(wm, image_zone);
 	sleep(4);
 	XSync(wm->display, False);
 	printf("---------------------\n");
-	return wheat_color_sequence;
+	return color_sequence;
 }
 
-void	build_color_matrix(Rgb color_matrix[1080][1920], XImage *pixel_zone, Rectangle zone)
+void	build_color_matrix(WinManager *wm, Rgb color_matrix[1080][1920])
 {
+	Rectangle screen_zone = create_rectangle(0, 0, 1920, 1080);
+	XImage *screen_image = get_zone_to_check(wm, screen_zone);
 	for (int y = 0; y < 1080; y++)
 		for (int x = 0; x < 1920; x++)
 			color_matrix[y][x] = (Rgb){0,0,0};
 
-	for (int y = 0; y < pixel_zone->height; y++)
+	for (int y = 0; y < screen_image->height; y++)
 	{
-		for (int x = 0; x < pixel_zone->width; x++)
+		for (int x = 0; x < screen_image->width; x++)
 		{
-			unsigned long pixel = XGetPixel(pixel_zone, x, y);
-			Rgb pixel_color = convert_pixel_to_rgb(pixel_zone, pixel);
+			unsigned long pixel = XGetPixel(screen_image, x, y);
+			Rgb pixel_color = convert_pixel_to_rgb(screen_image, pixel);
 			color_matrix[y][x] = pixel_color;
 		}
 	}
@@ -271,7 +267,6 @@ bool	pattern_match(Rgb color_matrix[1080][1920], Rgb *ref_color_pattern, int pat
 	return matching_pattern;
 }
 
-
 int	find_matching_pattern(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pattern_length, int tolerance, Point matches[216])
 {
 	int	match_counter = 0;
@@ -288,14 +283,6 @@ int	find_matching_pattern(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], 
 		}
 	}
 	return match_counter;
-}
-
-
-void	print_matching_pattern_position(int size, Point matches[size])
-{
-	for (int i = 1; i < size; i++)
-		printf("Matching pattern : %d %d\n", matches[i].x, matches[i].y);
-		//reap_wheat(wm, matches[i].x, matches[i].y);
 }
 
 Point	find_player(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance)
@@ -457,7 +444,6 @@ Point	find_closest_placement_to_enemy(Point red_square[], int size, Point enemy_
 	return placement;
 }
 
-
 int	check_movement_point(WinManager *wm, int tolerance)
 {
 	Rectangle movement_point_zone = create_rectangle(1151, 893, 2, 1);
@@ -536,3 +522,40 @@ int	check_movement_point(WinManager *wm, int tolerance)
 	}
 	return -1;
 }
+
+int	is_my_turn(WinManager *wm)
+{
+	Rectangle turn_zone = create_rectangle (1109, 894, 16, 8);
+	XImage *turn_image = get_zone_to_check(wm, turn_zone);
+	if (check_orange_context_menu_color(turn_image, orange_button, 3) > 30)
+	{
+		printf("Orange find in 1109, 894 : It's your turn !\n");
+		return 1;
+	}
+	printf("COULD NOT FIND ORANGE IN THE ORANGE CIRCLE IT IS NOT YOUR TURN\n");
+	return 0;
+}
+
+int	check_enemy_life(WinManager *wm)
+{
+	int tolerance = 3;
+	Rectangle life_zone = create_rectangle(1556, 836, 7, 1);
+	XImage* life_zone_image = get_zone_to_check(wm, life_zone);
+	for (int i = 0; i < life_zone.width; i++)
+	{
+		unsigned long pixel = XGetPixel(life_zone_image, i, life_zone.height);
+		Rgb rgb = convert_pixel_to_rgb(life_zone_image, pixel);
+		if (abs(rgb.b - blue_color.b) < tolerance)
+		{
+			printf("Enemy is dead\n");
+			return 1;
+		}
+		else
+		{
+			printf("Enemy isnt dead yet\n");
+			return 2;
+		}
+	}
+	return 0;
+}
+

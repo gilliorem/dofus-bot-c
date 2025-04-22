@@ -1,21 +1,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "window_manager.h"
-#include "event_handler.h"
 #include "screen_reading.h"
+#include "log.h"
+#include "mouse_manager.h"
+#include "farmer.h"
+#include "combat.h"
 #include "types.h"
+#include "bot.h"
 
 int	main(void)
 {
+
+	//run();
 	WinManager *wm = init_bot();
-
-	//log_in(wm);
-	//sleep(5);
 	Rgb color_matrix[1080][1920];
-
-	Rectangle screen_zone = create_rectangle(0, 0, 1920, 1080);
-	XImage *screen_image = get_zone_to_check(wm, screen_zone);
-	build_color_matrix(color_matrix, screen_image, screen_zone);
+	build_color_matrix(wm, color_matrix);
+	while (1)
+	{
+		if (reap_wheat(wm, color_matrix) == 1)
+			break;
+	}
+	equip_weapon(wm);
+	// il faut check le tactimal mode avant de l'activer (p-e) m pas utile car jamais de check cases combat grises
+	tactical_mode(wm);
+	Point player_pos = find_player(mandrage_color_pattern, color_matrix, 3, 3);
+	Point enemy_pos = find_enemy(color_matrix, scarecrow_hat_dark_brown, 5, 3);
+	Point red_square[50];
+	int red_squares = get_red_square_pos(color_matrix, 88, 3, player_pos, enemy_pos, red_square);
+	player_pos = find_closest_placement_to_enemy(red_square, red_squares, enemy_pos);
+	place_player(wm, player_pos);
 
 /*	Point player = find_player(mandrage_color_pattern, color_matrix, 2, 1);
 	Point enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 9, 2);
@@ -26,11 +40,12 @@ int	main(void)
 */
 //	move_towards_enemy(wm, color_matrix);
 	
-
+/*
 	Point matches[216];
 	int size = find_matching_pattern(oat_color_pattern, color_matrix, 3, 8, matches);
 	print_matching_pattern_position(size, matches);
 	sleep(2);
 	XSync(wm->display, False);
+*/
 	return (0);
 }
