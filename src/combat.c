@@ -4,34 +4,40 @@
 #include "types.h"
 
 //ajouter un check pour voir si l'arme est deja equipee
+// weapon etant dans ce cas l'arme de cac (ici, marteau bouftou)
 int	check_weapon(WinManager *wm)
 {
 	Rgb ref = {.r = 255, .g = 255, .b = 255};
 	int tolerance = 5;
-	Rectangle weapon_zone = create_rectangle(1274, 968, 1, 1);
+	Rectangle scythe_zone = create_rectangle(1274, 968, 1, 1);
+	XImage *scythe_image = get_zone_to_check(wm, scythe_zone);
+	unsigned long pixel = XGetPixel(scythe_image, 0, 0);
+	Rgb scythe_color = convert_pixel_to_rgb(scythe_image, pixel);
+	Rectangle weapon_zone = create_rectangle(1320, 968, 1, 1);
 	XImage *weapon_image = get_zone_to_check(wm, weapon_zone);
-	printf("%d\n", weapon_image->height);
-	unsigned long pixel = XGetPixel(weapon_image, 1, 1);
-	Rgb weapon_color = convert_pixel_to_rgb(weapon_image, pixel);
-	if (abs(ref.r - weapon_color.r) > tolerance)
-		{
-			printf("Faux is not equip\n");
-			return 1;
-		}
-	printf("Faux is equiped\n");
+	unsigned long w_pixel = XGetPixel(weapon_image, 0, 0);
+	Rgb weapon_color = convert_pixel_to_rgb(weapon_image, w_pixel);
+	if (abs(ref.r - weapon_color.r) < tolerance)
+	{
+		printf("Weapon equip\n");
+		return 1;
+	}
+	else if (abs(ref.r - scythe_color.r) < tolerance)
+	{
+		printf("Faux is equip\n");
+		return 2;
+	}
+	printf("checking-weapon-state is incorrect \n");
 	return 0;
 }
 
 void	equip_weapon(WinManager *wm)
 {
-	if (check_weapon(wm) == 0)
-		return;
-	move_mouse(wm, 1340, 975);
-	sleep(.5);
-	double_click(wm);
+	if (check_weapon(wm) == 2)
+		double_click(wm, 1320, 968);
 }
 
-// in order to check if still in combat mode can check the pixel in 1080, 1025 (white flage)
+// in order to check if still in combat mode can check the pixel in 1080, 1025 (white flag)
 
 int	check_tactical_mode(WinManager *wm)
 {
@@ -39,8 +45,9 @@ int	check_tactical_mode(WinManager *wm)
 	int tolerance = 5;
 	Rectangle tactical_zone = create_rectangle(1533, 754, 1, 1);
 	XImage *tactical_image = get_zone_to_check(wm, tactical_zone);
-	Rgb* tactical_color = get_color_in_frame(wm, tactical_image);
-	if (abs(ref.r - tactical_color->r) > tolerance)
+	unsigned long pixel = XGetPixel(tactical_image, 0, 0);
+	Rgb tactical_color = convert_pixel_to_rgb(tactical_image, pixel);
+	if (abs(ref.r - tactical_color.r) > tolerance)
 		{
 			printf("Tactical mode is OFF.\n");
 			return 1;

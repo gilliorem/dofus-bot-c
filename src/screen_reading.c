@@ -181,13 +181,26 @@ int	check_orange_context_menu_color(XImage *zone_to_check, Rgb orange_button, in
 
 int	check_in_game(WinManager *wm)
 {
-	Rgb ref = {.r = 131, .g = 82, .b = 1};
+	Rgb in_game_ref = {.r = 131, .g = 82, .b = 1};
+	Rgb log_in_screen_ref = {.r = 245, .g = 216, .b = 167};
 	int tolerance = 5;
-	Rectangle inventory_r = create_rectangle(1314, 884, 1, 1);
-	XImage *inventory_image = get_zone_to_check(wm, inventory_r);
-	Rgb* inventory_color = get_color_in_frame(wm, inventory_image);
-	if (abs(ref.r - inventory_color->r) > tolerance)
+	Rectangle r = create_rectangle(1314, 884, 1, 1);
+	XImage *image = get_zone_to_check(wm, r);
+	unsigned long pixel = XGetPixel(image, 0, 0);
+	Rgb pixel_color = convert_pixel_to_rgb(image, pixel);
+	printf("%d %d %d %ld \n", pixel_color.r, pixel_color.g, pixel_color.b, pixel);
+	if (abs(in_game_ref.r - pixel_color.r) < tolerance)
+	{
+		printf("IN GAME\n");
 		return 1;
+	}
+	else if (abs(log_in_screen_ref.r - pixel_color.r) < tolerance)
+	{
+		printf("IN LOG IN SCREEN\n");
+		return 2;
+	}
+	printf("COULD NOT SEE ANY DOFUS SCREEN\n");
+	return 0;
 }
 
 int	ready_button_visible(WinManager *wm)

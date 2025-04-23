@@ -8,7 +8,7 @@ int	start(WinManager *wm)
 	int i = 0;
 	while (i < 3)
 	{
-		double_click(wm);
+		double_click(wm, 544, 530);
 		sleep(4);
 		i++;
 	}

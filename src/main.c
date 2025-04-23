@@ -16,7 +16,11 @@ int	main(void)
 	WinManager *wm = init_bot();
 	Rgb color_matrix[1080][1920];
 	build_color_matrix(wm, color_matrix);
-	check_weapon(wm);
+	// gerer les cas ou on est sur le log in screen 
+	// differencier in_game_screen de in combat
+	if (check_in_game(wm) == 1) 
+		//if (ready_button_visible(wm) == 1)
+		equip_weapon(wm);
 /*
 	tactical_mode(wm);
 	Point player_pos = find_player(mandrage_color_pattern, color_matrix, 3, 3);

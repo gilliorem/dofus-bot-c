@@ -51,10 +51,10 @@ void	click(WinManager *wm, int x, int y)
 	fake_click(wm, 1, True);
 }
 
-void	double_click(WinManager *wm)
+void	double_click(WinManager *wm, int x, int y)
 {
-	fake_click(wm, 1, True);
+	click(wm, x, y);
 	sleep(.1);
-	fake_click(wm, 1, True);
+	click(wm, x, y);
 }
 

@@ -6,7 +6,7 @@ void	equip_faux(WinManager *wm)
 {
 	move_mouse(wm, 1285, 975);
 	sleep(.5);
-	double_click(wm);
+	double_click(wm, 1285, 975);
 	sleep(2);
 	XSync(wm->display, False);
 }

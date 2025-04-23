@@ -14,6 +14,6 @@ void	get_mouse_coordinates(WinManager *wm, Point point);
 void	move_mouse(WinManager *wm, int x, int y);
 void	fake_click(WinManager *wm, int button, Bool dowm);
 void	click(WinManager *wm, int x, int y);
-void	double_click(WinManager *wm);
+void	double_click(WinManager *wm, int x, int y);
 
 #endif
