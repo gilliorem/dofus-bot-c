@@ -20,8 +20,10 @@ extern Rgb hop_color_pattern[5];
 extern Rgb mandrage_color_pattern[3];
 extern Rgb hop_mob;
 extern Rgb blue_color;
+extern Rgb red_color;
 extern Rgb scarecrow_hat_dark_brown;
 
+Rgb* red_circle_pattern(int len);
 Rectangle	create_rectangle(int x, int y, unsigned int width, unsigned int height);
 XImage	*get_zone_to_check(WinManager *wm, Rectangle rectangle);
 int	get_bit_shift(unsigned long color_mask);

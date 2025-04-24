@@ -58,6 +58,7 @@ Rgb hop_color_pattern[5] = {
 Rgb scarecrow_hat_dark_brown = {.r = 125, .g = 81, .b = 33};
 Rgb hop_keeper = {.r = 0, .b = 50, .g = 0};
 Rgb blue_color = {.r = 0, .b = 255, .g = 0};
+Rgb red_color = {.r = 255, .b = 0, .g = 0};
 
 Rectangle create_rectangle(int x, int y, unsigned int width, unsigned int height) {
 	Rectangle rectangle;
@@ -343,7 +344,6 @@ Point	find_player(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pixe
 	if (same_pattern_counter < 1)
 	{
 		printf("COULD NOT FIND ANY PLAYER'S COLOR PATTERN\n");
-		return (Point){-1, -1};
 	}
 	printf("PLAYER POS: [%d, %d]\n", player_pos.x, player_pos.y);
 	return player_pos;
@@ -380,10 +380,7 @@ Point	find_enemy(Rgb color_matrix[1080][1920], Rgb enemy_color, int pixel_patter
 	}
 	printf("FOUND A TOTAL OF %d MATCHING ENEMY PATTERN ACROSS THE SCREEN\n", same_pattern_counter);
 	if (same_pattern_counter < 1)
-	{
 		printf("COULD NOT FIND ANY ENEMY MATCHING PATTERN MATCH\n");
-		return (Point){-1, -1};
-	}
 	printf("ENEMY POS: [%d, %d]\n", enemy_pos.x, enemy_pos.y);
 	return enemy_pos;
 }

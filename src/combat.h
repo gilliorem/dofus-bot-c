@@ -14,6 +14,7 @@ void	move_right(WinManager *wm, Point player_pos);
 void	move_left(WinManager *wm, Point player_pos);
 void	move_up(WinManager *wm, Point player_pos);
 void	move_down(WinManager *wm, Point player_pos);
+void	move_down_right(WinManager *wm, Point player_pos);
 void	move_down_left(WinManager *wm, Point player_pos);
 void	move_up_right(WinManager *wm, Point player_pos);
 void	move_up_left(WinManager *wm, Point player_pos);
