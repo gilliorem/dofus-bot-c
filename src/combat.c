@@ -109,6 +109,29 @@ void	move(WinManager *wm, int x, int y)
 	XSync(wm->display, False);
 }
 
+// on va faire 2 nouvelles fonctions : 
+// on va regarder ou se trouve notre joueur
+// on va regarder ou se trouve l'ennemi
+// on va transformer en terme de case
+// pour transformer en dalle : il nous faut reperer le pattern dalle (il y en a 2)
+// attention je vois un probleme : notre joueur cache les dales : on peut modifier ca en 
+// enft on va faire comme dans la fonction qui detectent les red squares
+// en masquant nos joueurs et en ayant seuelemt les cercles 
+// donc par exemple je suis en 600, 550
+
+// light & dark grey tile pattern ; 93 px de large
+// une fois qu'on trouve un pattern on le met dans un tableau de Point ?
+// ou alors on fait une nouvelle struct qui est Tile qui fait la conversion
+// une tile c'est donc 93 de large et 47 de haut
+
+// fonction qui traduit les coordonnes x,y en tile
+// qui dessine le board en 10*10 par ex
+
+int get_board()
+{
+	
+}
+
 int	move_towards_enemy_x(WinManager *wm, Rgb color_matrix[1080][1920])
 {
 	int counter = 0;
