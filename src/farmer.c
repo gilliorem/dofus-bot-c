@@ -1,8 +1,10 @@
 #include "mouse_manager.h"
 #include "screen_reading.h"
 #include <stdlib.h>
+#include "farmer.h"
+#include "combat.h"
 
-void	equip_faux(WinManager *wm)
+void	equip_scythe(WinManager *wm)
 {
 	move_mouse(wm, 1285, 975);
 	sleep(.5);
@@ -13,13 +15,6 @@ void	equip_faux(WinManager *wm)
 
 int open_inventory(WinManager *wm)
 {
-	Rgb ref = {.r = 131, .g = 82, .b = 1};
-	int tolerance = 5;
-	Rectangle inventory_r = create_rectangle(1314, 884, 1, 1);
-	XImage *inventory_image = get_zone_to_check(wm, inventory_r);
-	Rgb* inventory_color = get_color_in_frame(wm, inventory_image);
-	if (abs(ref.r - inventory_color->r) > tolerance)
-		return 1;
 	move_mouse(wm, 1314, 884);
 	sleep(1);
 	fake_click(wm, 1, true);
@@ -41,7 +36,7 @@ void	reap(WinManager* wm, int x, int y)
 	sleep(1);
 	fake_click(wm, 1, True);
 	sleep(1);
-	move_mouse(wm, x+=50, y+=70);
+	move_mouse(wm, x+=40, y+=50);
 	sleep(1);
 	fake_click(wm, 1, True);
 	sleep(15);
@@ -49,8 +44,18 @@ void	reap(WinManager* wm, int x, int y)
 
 int	reap_wheat(WinManager *wm, Rgb color_matrix[1080][1920])
 {
+	if (check_weapon(wm) != WEAPON_SCYTHE)
+	{
+		printf("Scythe is not equip\n");
+		equip_scythe(wm);
+	}
 	Point wheat[216];
 	int wheats = find_matching_pattern(wheat_color_pattern, color_matrix, 4, 10, wheat);
+	if (wheats < 1)
+	{
+		printf("No wheat found, abort\n");
+		return 0;
+	}
 	if (ready_button_visible(wm) == 1)
 		return 1;
 	for (int i = 1; i < wheats; i++)
@@ -77,7 +82,11 @@ int	reap_wheat(WinManager *wm, Rgb color_matrix[1080][1920])
 int	reap_barley(WinManager *wm, Rgb color_matrix[1080][1920])
 {
 	Point barley[216];
+	if (check_weapon(wm) != WEAPON_SCYTHE)
+		equip_scythe(wm);
 	int barleys = find_matching_pattern(barley_color_pattern, color_matrix, 3, 8, barley);
+	if (barleys < 1)
+		return 0;
 	for (int i = 1; i < barleys; i++)
 	{
 		printf("Found barley in (%d %d)\n", barley[i].x, barley[i].y);
@@ -102,7 +111,11 @@ int	reap_barley(WinManager *wm, Rgb color_matrix[1080][1920])
 int	reap_oat(WinManager *wm, Rgb color_matrix[1080][1920])
 {
 	Point oat[216];
+	if (check_weapon(wm) != WEAPON_SCYTHE)
+		equip_scythe(wm);
 	int oats = find_matching_pattern(oat_color_pattern, color_matrix, 3, 15, oat);
+	if (oats < 1)
+		return 0;
 	for (int i = 1; i < oats; i++)
 	{
 		printf("Found oat in (%d %d)\n", oat[i].x, oat[i].y);
@@ -122,22 +135,36 @@ int	reap_oat(WinManager *wm, Rgb color_matrix[1080][1920])
 
 int	reap_hop(WinManager *wm, Rgb color_matrix[1080][1920])
 {
-	Point hop[216];
-	int hops = find_matching_pattern(hop_color_pattern, color_matrix, 3, 12, hop);
-	for (int i = 1; i < hops; i++)
+	for (int i = 0; i < 10; i++)
 	{
-		printf("Found hop in (%d %d)\n", hop[i].x, hop[i].y);
-		reap(wm, hop[i].x, hop[i].y);
+		Point hop[216];
 		if (ready_button_visible(wm) == 1)
 			return 1;
-	}
-	open_inventory(wm);
-	if (full_pods(wm) == 1)
-	{
+		if (check_weapon(wm) != WEAPON_SCYTHE)
+			equip_scythe(wm);
+		int hops = find_matching_pattern(hop_color_pattern, color_matrix, 3, 5, hop);
+		if (hops < 1)
+		{
+			printf("Hop not find\n");
+			return 0;
+		}
+		for (int i = 1; i < hops; i++)
+		{
+			printf("Found hop in (%d %d)\n", hop[i].x, hop[i].y);
+			reap(wm, hop[i].x, hop[i].y);
+			if (ready_button_visible(wm) == 1)
+				return 1;
+			else if (ok_button_visible(wm) == 1)
+				click(wm, 1230, 480);
+		}
+		open_inventory(wm);
+		if (full_pods(wm) == 1)
+		{
+			close_inventory(wm);
+			return 2;
+		}
 		close_inventory(wm);
-		return 2;
 	}
-	close_inventory(wm);
 	return 0;
 }
 

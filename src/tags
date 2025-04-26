@@ -1,0 +1,84 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	/home/lisa/dofus/dofus-bot-c/src/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	//
+attack	combat.c	/^void	attack(WinManager *wm, Point enemy)$/;"	f	typeref:typename:void
+barley_color_pattern	screen_reading.c	/^Rgb barley_color_pattern[3] = {$/;"	v	typeref:typename:Rgb[3]
+blue_color	screen_reading.c	/^Rgb blue_color = {.r = 0, .b = 255, .g = 0};$/;"	v	typeref:typename:Rgb
+boost	combat.c	/^void	boost(WinManager *wm, Point player)$/;"	f	typeref:typename:void
+build_color_matrix	screen_reading.c	/^void	build_color_matrix(WinManager *wm, Rgb color_matrix[1080][1920])$/;"	f	typeref:typename:void
+check_enemy_life	screen_reading.c	/^int	check_enemy_life(WinManager *wm)$/;"	f	typeref:typename:int
+check_in_game	screen_reading.c	/^int	check_in_game(WinManager *wm)$/;"	f	typeref:typename:int
+check_log_in	screen_reading.c	/^int	check_log_in(XImage *zone_to_check)$/;"	f	typeref:typename:int
+check_movement_point	screen_reading.c	/^int	check_movement_point(WinManager *wm, int tolerance)$/;"	f	typeref:typename:int
+check_orange_context_menu_color	screen_reading.c	/^int	check_orange_context_menu_color(XImage *zone_to_check, Rgb orange_button, int tolerance)$/;"	f	typeref:typename:int
+check_tactical_mode	combat.c	/^int	check_tactical_mode(WinManager *wm)$/;"	f	typeref:typename:int
+check_weapon	combat.c	/^enum Weapon	check_weapon(WinManager *wm)$/;"	f	typeref:enum:Weapon
+click	mouse_manager.c	/^void	click(WinManager *wm, int x, int y)$/;"	f	typeref:typename:void
+click_ready_button	combat.c	/^void	click_ready_button(WinManager *wm)$/;"	f	typeref:typename:void
+close_fight_window	combat.c	/^void	close_fight_window(WinManager *wm)$/;"	f	typeref:typename:void
+close_inventory	farmer.c	/^void close_inventory(WinManager *wm)$/;"	f	typeref:typename:void
+context_menu_dark_gray	screen_reading.c	/^Rgb context_menu_dark_gray[3] = {$/;"	v	typeref:typename:Rgb[3]
+context_menu_light_gray	screen_reading.c	/^Rgb context_menu_light_gray[3] = {$/;"	v	typeref:typename:Rgb[3]
+convert_pixel_to_rgb	screen_reading.c	/^Rgb	convert_pixel_to_rgb(XImage *zone_to_check, unsigned long pixel)$/;"	f	typeref:typename:Rgb
+create_rectangle	screen_reading.c	/^Rectangle create_rectangle(int x, int y, unsigned int width, unsigned int height) {$/;"	f	typeref:typename:Rectangle
+double_click	mouse_manager.c	/^void	double_click(WinManager *wm, int x, int y)$/;"	f	typeref:typename:void
+end_tour	combat.c	/^void	end_tour(WinManager *wm)$/;"	f	typeref:typename:void
+equip_faux	farmer.c	/^void	equip_faux(WinManager *wm)$/;"	f	typeref:typename:void
+equip_weapon	combat.c	/^void	equip_weapon(WinManager *wm)$/;"	f	typeref:typename:void
+fake_click	mouse_manager.c	/^void fake_click(WinManager *wm, int button, Bool down)$/;"	f	typeref:typename:void
+find_closest_placement_to_enemy	screen_reading.c	/^Point	find_closest_placement_to_enemy(Point red_square[], int size, Point enemy_pos)$/;"	f	typeref:typename:Point
+find_enemy	screen_reading.c	/^Point	find_enemy(Rgb color_matrix[1080][1920], Rgb enemy_color, int pixel_pattern_length, int to/;"	f	typeref:typename:Point
+find_matching_pattern	screen_reading.c	/^int	find_matching_pattern(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pattern_leng/;"	f	typeref:typename:int
+find_player	screen_reading.c	/^Point	find_player(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pixel_pattern_length/;"	f	typeref:typename:Point
+full_pods	screen_reading.c	/^int	full_pods(WinManager *wm)$/;"	f	typeref:typename:int
+get_attributes	window_manager.c	/^void get_attributes(WinManager *wm)$/;"	f	typeref:typename:void
+get_bit_shift	screen_reading.c	/^int	get_bit_shift(unsigned long color_mask)$/;"	f	typeref:typename:int
+get_color_in_frame	screen_reading.c	/^Rgb*	get_color_in_frame(WinManager *wm, XImage *zone_to_check)$/;"	f	typeref:typename:Rgb *
+get_color_sequence	screen_reading.c	/^Rgb*	 get_color_sequence(WinManager *wm, Rectangle zone_r)$/;"	f	typeref:typename:Rgb *
+get_mouse_coordinates	mouse_manager.c	/^void	get_mouse_coordinates(WinManager *wm, Point point)$/;"	f	typeref:typename:void
+get_red_square_pos	screen_reading.c	/^int	get_red_square_pos(Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance, Po/;"	f	typeref:typename:int
+get_subwindows	window_manager.c	/^void	get_subwindows(WinManager *wm)$/;"	f	typeref:typename:void
+get_window_name	window_manager.c	/^void 	get_window_name(WinManager *wm)$/;"	f	typeref:typename:void
+get_zone_to_check	screen_reading.c	/^XImage	*get_zone_to_check(WinManager *wm, Rectangle rectangle)$/;"	f	typeref:typename:XImage *
+hop_color_pattern	screen_reading.c	/^Rgb hop_color_pattern[5] = {$/;"	v	typeref:typename:Rgb[5]
+hop_keeper	screen_reading.c	/^Rgb hop_keeper = {.r = 0, .b = 50, .g = 0};$/;"	v	typeref:typename:Rgb
+init_bot	window_manager.c	/^WinManager	*init_bot()$/;"	f	typeref:typename:WinManager *
+is_my_turn	screen_reading.c	/^int	is_my_turn(WinManager *wm)$/;"	f	typeref:typename:int
+log_in	log.c	/^int	log_in(WinManager *wm)$/;"	f	typeref:typename:int
+log_in_button	screen_reading.c	/^Rgb log_in_button = {.r = 242, .g = 146, .b = 0};$/;"	v	typeref:typename:Rgb
+main	main.c	/^int	main(void)$/;"	f	typeref:typename:int
+mandrage_color_pattern	screen_reading.c	/^Rgb mandrage_color_pattern[3] = {$/;"	v	typeref:typename:Rgb[3]
+move	combat.c	/^void	move(WinManager *wm, int x, int y)$/;"	f	typeref:typename:void
+move_mouse	mouse_manager.c	/^void	move_mouse(WinManager *wm, int x, int y)$/;"	f	typeref:typename:void
+move_towards_enemy_x	combat.c	/^int	move_towards_enemy_x(WinManager *wm, Rgb color_matrix[1080][1920])$/;"	f	typeref:typename:int
+move_towards_enemy_y	combat.c	/^int	move_towards_enemy_y(WinManager *wm, Rgb color_matrix[1080][1920])$/;"	f	typeref:typename:int
+oat_color_pattern	screen_reading.c	/^Rgb oat_color_pattern[3] = {$/;"	v	typeref:typename:Rgb[3]
+ok_button_visible	screen_reading.c	/^int	ok_button_visible(WinManager *wm)$/;"	f	typeref:typename:int
+ok_orange_button	screen_reading.c	/^Rgb ok_orange_button = {.r = 255, .g = 97, .b = 0};$/;"	v	typeref:typename:Rgb
+open_inventory	farmer.c	/^int open_inventory(WinManager *wm)$/;"	f	typeref:typename:int
+orange_button	screen_reading.c	/^Rgb orange_button = {.r = 255, .g = 102, .b = 0};$/;"	v	typeref:typename:Rgb
+pattern_match	screen_reading.c	/^bool	pattern_match(Rgb color_matrix[1080][1920], Rgb *ref_color_pattern, int pattern_length, int/;"	f	typeref:typename:bool
+place_player	combat.c	/^void	place_player(WinManager *wm, Point placement)$/;"	f	typeref:typename:void
+ready_button_visible	screen_reading.c	/^int	ready_button_visible(WinManager *wm)$/;"	f	typeref:typename:int
+reap	farmer.c	/^void	reap(WinManager* wm, int x, int y)$/;"	f	typeref:typename:void
+reap_barley	farmer.c	/^int	reap_barley(WinManager *wm, Rgb color_matrix[1080][1920])$/;"	f	typeref:typename:int
+reap_hop	farmer.c	/^int	reap_hop(WinManager *wm, Rgb color_matrix[1080][1920])$/;"	f	typeref:typename:int
+reap_oat	farmer.c	/^int	reap_oat(WinManager *wm, Rgb color_matrix[1080][1920])$/;"	f	typeref:typename:int
+reap_wheat	farmer.c	/^int	reap_wheat(WinManager *wm, Rgb color_matrix[1080][1920])$/;"	f	typeref:typename:int
+red_color	screen_reading.c	/^Rgb red_color = {.r = 255, .b = 0, .g = 0};$/;"	v	typeref:typename:Rgb
+red_color_pattern	screen_reading.c	/^Rgb red_color_pattern[36] = {$/;"	v	typeref:typename:Rgb[36]
+run	bot.c	/^void	run()$/;"	f	typeref:typename:void
+scarecrow_hat_dark_brown	screen_reading.c	/^Rgb scarecrow_hat_dark_brown = {.r = 125, .g = 81, .b = 33};$/;"	v	typeref:typename:Rgb
+setXConnection	window_manager.c	/^WinManager	*setXConnection(void)$/;"	f	typeref:typename:WinManager *
+start	log.c	/^int	start(WinManager *wm)$/;"	f	typeref:typename:int
+tactical_mode	combat.c	/^void	tactical_mode(WinManager *wm)$/;"	f	typeref:typename:void
+wheat	screen_reading.c	/^Rgb wheat = {.r = 56, .g = 62, .b = 15};$/;"	v	typeref:typename:Rgb
+wheat_color_pattern	screen_reading.c	/^Rgb wheat_color_pattern[4] = {$/;"	v	typeref:typename:Rgb[4]

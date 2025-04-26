@@ -2,10 +2,12 @@
 #include <math.h>
 #include <stdlib.h>
 #include "types.h"
+#include "combat.h"
+#include "screen_reading.h"
 
 //ajouter un check pour voir si l'arme est deja equipee
 // weapon etant dans ce cas l'arme de cac (ici, marteau bouftou)
-int	check_weapon(WinManager *wm)
+enum Weapon	check_weapon(WinManager *wm)
 {
 	Rgb ref = {.r = 255, .g = 255, .b = 255};
 	int tolerance = 5;
@@ -19,13 +21,13 @@ int	check_weapon(WinManager *wm)
 	Rgb weapon_color = convert_pixel_to_rgb(weapon_image, w_pixel);
 	if (abs(ref.r - weapon_color.r) < tolerance)
 	{
-		printf("Weapon equip\n");
-		return 1;
+		printf("Hammer equip\n");
+		return WEAPON_HAMMER;
 	}
 	else if (abs(ref.r - scythe_color.r) < tolerance)
 	{
 		printf("Faux is equip\n");
-		return 2;
+		return WEAPON_SCYTHE;
 	}
 	printf("checking-weapon-state is incorrect \n");
 	return 0;
@@ -33,7 +35,7 @@ int	check_weapon(WinManager *wm)
 
 void	equip_weapon(WinManager *wm)
 {
-	if (check_weapon(wm) == 2)
+	if (check_weapon(wm) != WEAPON_HAMMER)
 	{
 		printf("switching to weapon\n");
 		double_click(wm, 1320, 968);
@@ -83,168 +85,165 @@ void	click_ready_button(WinManager *wm)
 	click(wm, 1575, 807);
 }
 
-void	move_right(WinManager *wm, Point player_pos)
+void placement(WinManager *wm, Rgb color_matrix[1080][1920])
 {
-	move_mouse(wm, player_pos.x + 150, player_pos.y + 75);
+	build_color_matrix(wm, color_matrix);
+	Point red_square[50];
+	Point player_pos = find_player(mandrage_color_pattern, color_matrix, 3, 5);
+	Point enemy_pos = find_enemy (color_matrix, scarecrow_hat_dark_brown, 9, 2);
+	int red_squares = get_red_square_pos(color_matrix, 88, 3, player_pos, enemy_pos, red_square);
+	if (red_squares < 1)
+		return;
+	player_pos = find_closest_placement_to_enemy(red_square, red_squares, enemy_pos);
+	place_player(wm, player_pos);
+	click_ready_button(wm);
+	sleep(2);
+}
+
+void	move(WinManager *wm, int x, int y)
+{
+	move_mouse(wm, x, y); 
 	sleep(.5);
 	fake_click(wm, 1, True);
-	printf("move right\n");
+	sleep(1);
+	XSync(wm->display, False);
 }
 
-void	move_left(WinManager *wm, Point player_pos)
-{
-	move_mouse(wm, player_pos.x - 150, player_pos.y + 75);
-	sleep(.5);
-	fake_click(wm, 1, True);
-	printf("moved left\n");
-}
-
-void	move_up(WinManager *wm, Point player_pos)
-{
-	move_mouse(wm, player_pos.x + 50, player_pos.y - 75);
-	sleep(.5);
-	fake_click(wm, 1, True);
-	printf("moved up \n");
-}
-
-void	move_down(WinManager *wm, Point player_pos)
-{
-	move_mouse(wm, player_pos.x - 50, player_pos.y + 75);
-	sleep(.5);
-	fake_click(wm, 1, True);
-	printf("moved down\n");
-}
-
-void	move_down_right(WinManager *wm, Point player_pos)
-{
-	move_mouse(wm, player_pos.x + 50, player_pos.y + 75);
-	sleep(.4);
-	fake_click(wm, 1, True);
-	printf("moved down right\n");
-}
-
-void	move_down_left(WinManager *wm, Point player_pos)
-{
-	move_mouse(wm, player_pos.x - 125, player_pos.y + 75);
-	sleep(.5);
-	fake_click(wm, 1, True);
-	printf("moved down left\n");
-}
-
-void	move_up_right(WinManager *wm, Point player_pos)
-{
-	move_mouse(wm, player_pos.x + 100, player_pos.y - 75);
-	sleep(.5);
-	fake_click(wm, 1, True);
-	printf("moved up right\n");
-}
-
-void	move_up_left(WinManager *wm, Point player_pos)
-{
-	move_mouse(wm, player_pos.x - 100, player_pos.y - 75);
-	sleep(.5);
-	fake_click(wm, 1, True);
-	printf("moved up left\n");
-}
-
-// find the closest path between player and enemy+
-int	move_towards_enemy(WinManager *wm, Rgb color_matrix[1080][1920])
+int	move_towards_enemy_x(WinManager *wm, Rgb color_matrix[1080][1920])
 {
 	int counter = 0;
-	Point player = find_player(mandrage_color_pattern, color_matrix, 2, 2);
+	Point player = find_player(red_color_pattern, color_matrix, 32, 2);
 	Point enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 10, 2);
-	while (abs(player.x - enemy.x) > 50 || abs(player.y - enemy.y) > 50 && counter <= 10)
+	while (abs(player.x - enemy.x) > 80 || counter > 4)
 	{
-		player = find_player(mandrage_color_pattern, color_matrix, 2, 2);
+		build_color_matrix(wm, color_matrix);
+		player = find_player(red_color_pattern, color_matrix, 32, 2);
 		enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 10, 2);
-		if (abs(player.x - enemy.x) > 50 || abs(player.x - enemy.x) > abs(player.y - enemy.y))
+		if ((player.x - enemy.x) < 105 && (player.x - enemy.x) > 49)
 		{
-			if (player.x > enemy.x)
-			{
-				printf("PlayerX < EnemyX : MOVE LEFT\n");
-				move_left(wm, player);
-				sleep(2);
-				Point player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
-				if (player.x == player_.x )
-					move_up_left(wm, player);
-				sleep(2);
-				printf("Player has moved in (%d, %d)\n", player.x, player.y);
-				click(wm, 1200, 1040);
-				sleep(15);
-			}
-			else if (player.x < enemy.x)
-			{
-				printf("PLAYER X > ENEMY X MOVE RIGHT \n");
-				move_right(wm, player);
-				sleep(2);
-				Point player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
-				if (player.x == player_.x )
-				{
-					move_up_right(wm, player);
-					sleep(.5);
-					XSync(wm->display, False);
-				}
-				sleep(2);
-				printf("Player has moved in (%d, %d)\n", player.x, player.y);
-				click(wm, 1200, 1040);
-				sleep(15);
-			}
+			move(wm, player.x - 45, player.y + 25);
+			counter++;
+			break;
 		}
-		else if (abs(player.y - enemy.y) > 50)
+		else if (player.x > enemy.x)
 		{
-			if (player.y < enemy.y)
-			{
-				printf("PLAYER IS 'ABOVE' ENEMY: PLAYER MOVE DOWN \n");
-				move_down(wm, player);
-				sleep(2);
-				Point player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
-				if (player.y == player_.y)
-				{
-					move_down_right(wm, player);
-					player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
-					if (player.y == player_.y)
-						move_down_left(wm, player);
-				}
-			}
-			else if (player.y > enemy.y)
-			{
-				printf("PLAYER IS 'BELOW' ENEMY: PLAYER MOVE UP \n");
-				move_up(wm, player);
-				sleep(2);
-				Point player_ = find_player(mandrage_color_pattern, color_matrix, 2, 2);
-				if (player.y == player_.y )
-					move_up_right(wm, player);
-			}
+			printf("PlayerX > EnemyX : Move de -150x, +100y\n");
+			move(wm, player.x - 135, player.y + 80);
+			sleep(2);
+			build_color_matrix(wm, color_matrix);
+			Point new_player = find_player(red_color_pattern, color_matrix, 32, 2);
+			if (new_player.x == player.x)
+				move(wm, player.x - 45, player.y + 25);
+			click(wm, 1200, 1040);
+			printf("Player has moved in (%d, %d)\n", new_player.x, new_player.y);
+			sleep(15);
+			counter++;
 		}
-		Point player = find_player(mandrage_color_pattern, color_matrix, 2, 2);
-		sleep(2);
-		printf("Player has moved in (%d, %d)\n", player.x, player.y);
-		click(wm, 1200, 1040);
-		sleep(15);
-		counter++;
+		else if ((enemy.x - player.x) < 150 && (enemy.x - player.x) > 49)
+		{
+			move(wm, player.x + 45, player.y - 25);
+			counter++;
+			break;
+		}
+		else if (player.x < enemy.x)
+		{
+			printf("PLAYER X < ENEMY X: MOVE RIGHT \n");
+			move(wm, player.x + 135, player.y - 80);
+			sleep(2);
+			build_color_matrix(wm, color_matrix);
+			Point new_player = find_player(red_color_pattern, color_matrix, 32, 2);
+			if (new_player.x == player.x)
+				move(wm, player.x + 45, player.y - 25);	
+			printf("Player has moved in (%d, %d)\n", new_player.x, new_player.y);
+			click(wm, 1200, 1040);
+			sleep(15);
+			counter++;
+		}
 	}
-	printf("ENEMY IN RANGE: %dx %dy close\n", player.x - enemy.x, player.y - enemy.y);
-	return 1;
+	printf("pX and eX 50 pixel close\n");
+	return 0;
 }
 
-void	boost(WinManager *wm, Point player)
+int	move_towards_enemy_y(WinManager *wm, Rgb color_matrix[1080][1920])
 {
-	click(wm, 1440, 975);
-	click(wm, player.x, player.y);
-	sleep(1);
-	click(wm, 1590, 975);
-	click(wm, player.x, player.y);
-	sleep(1);
+	int counter = 0;
+	Point player = find_player(red_color_pattern, color_matrix, 32, 2);
+	Point enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 10, 2);
+	while (abs(player.y - enemy.y) > 80 || counter > 4)
+	{
+		build_color_matrix(wm, color_matrix);
+		player = find_player(red_color_pattern, color_matrix, 32, 2);
+		enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 10, 2);
+		if ((player.y - enemy.y) < 50 && (player.y - enemy.y) > 40)
+		{
+			move(wm, player.x - 66, player.y - 30);
+			break;
+		}
+		else if (player.y > enemy.y)
+		{
+			printf("PlayerY > EnemyY : Move de -150x, +100y\n");
+			move(wm, player.x - 145, player.y - 75);
+			counter++;
+			sleep(2);
+			player = find_player(red_color_pattern, color_matrix, 32, 2);
+			printf("Player has moved in (%d, %d)\n", player.y, player.y);
+			click(wm, 1200, 1040);
+			sleep(15);
+		}
+		else if ((player.y - enemy.y) > 105 && (enemy.y - player.y) > 49)
+		{
+			move(wm, player.x - 45, player.y - 25);
+			break;
+		}
+		else if (player.y < enemy.y)
+		{
+			printf("PLAYER Y < ENEMY Y MOVE DOWN \n");
+			move(wm, player.x + 145, player.y + 60);
+			counter++;
+			sleep(2);
+			player = find_player(red_color_pattern, color_matrix, 32, 2);
+			printf("Player has moved in (%d, %d)\n", player.x, player.y);
+			click(wm, 1200, 1040);
+			sleep(15);
+		}
+	}
+	printf("pY and eY 50 pixel close\n");
+	return 0;
 }
 
-// this function compare the blue color sequence with the color sequence in zone
-
-void	attack(WinManager *wm, Point enemy)
+void	boost(WinManager *wm, Rgb color_matrix[1080][1920])
 {
-	click(wm, 1390, 975);
-	sleep(.5);
-	click(wm, enemy.x, enemy.y);
-	sleep(2);
+	build_color_matrix(wm, color_matrix);
+	Point player = find_player(mandrage_color_pattern, color_matrix, 2, 3);
+	int x = 1285;
+	for(int i = 0; i < 3; i++)
+	{
+		click(wm, x, 975);
+		click(wm, player.x, player.y);
+		x+= 50;
+	}
+	end_tour(wm);
+}
+
+void	attack(WinManager *wm, Rgb color_matrix[1080][1920])
+{
+	while (check_enemy_life(wm, color_matrix) != 0 && end_of_fight(wm) != 1 && is_my_turn(wm) == 1)
+	{
+		build_color_matrix(wm, color_matrix);
+		Point enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 9, 4);
+		for (int i = 0; i < 2; i++)
+		{
+			if (check_enemy_life(wm, color_matrix) != 0)
+			{
+				click(wm, 1440, 975);
+				click(wm, enemy.x, enemy.y);
+				sleep(1);
+			}
+			else if (is_my_turn(wm) != 1)
+				sleep(4);
+		}
+		end_tour(wm);
+	}
 }
 
 void	end_tour(WinManager *wm)

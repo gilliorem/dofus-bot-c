@@ -60,6 +60,54 @@ Rgb hop_keeper = {.r = 0, .b = 50, .g = 0};
 Rgb blue_color = {.r = 0, .b = 255, .g = 0};
 Rgb red_color = {.r = 255, .b = 0, .g = 0};
 
+Rgb blue_color_pattern[6] = {
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0}
+};
+
+Rgb red_color_pattern[36] = {
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0},
+ {.r = 255, .b = 0, .g = 0}
+};
+
 Rectangle create_rectangle(int x, int y, unsigned int width, unsigned int height) {
 	Rectangle rectangle;
 	rectangle.x = x;
@@ -106,6 +154,9 @@ Rgb	convert_pixel_to_rgb(XImage *zone_to_check, unsigned long pixel)
 	rgb.b = (pixel & zone_to_check->blue_mask) >> blue_shift;
 	return rgb;
 }
+
+// need to compare a sequence of pixel_rgb in a given zone
+
 
 Rgb*	get_color_in_frame(WinManager *wm, XImage *zone_to_check)
 {
@@ -343,7 +394,11 @@ Point	find_player(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pixe
 	printf("FOUND A TOTAL OF %d PIXELS MATCHING PLAYER'S COLOR PATTERN ACROSS THE MAP\n", same_pattern_counter);
 	if (same_pattern_counter < 1)
 	{
-		printf("COULD NOT FIND ANY PLAYER'S COLOR PATTERN\n");
+		printf("COULD NOT FIND ANY PLAYER'S COLOR PATTERN: RETURNING CENTER OF SCREEN COORDINATES\n");
+		Point center;
+		center.x = 1920/2;
+		center.y = 1080/2;
+		return center;
 	}
 	printf("PLAYER POS: [%d, %d]\n", player_pos.x, player_pos.y);
 	return player_pos;
@@ -380,7 +435,13 @@ Point	find_enemy(Rgb color_matrix[1080][1920], Rgb enemy_color, int pixel_patter
 	}
 	printf("FOUND A TOTAL OF %d MATCHING ENEMY PATTERN ACROSS THE SCREEN\n", same_pattern_counter);
 	if (same_pattern_counter < 1)
-		printf("COULD NOT FIND ANY ENEMY MATCHING PATTERN MATCH\n");
+	{
+		printf("COULD NOT FIND ANY ENEMY MATCHING PATTERN MATCH : RETURN POINT IN CENTER OF SCREEN\n");
+		Point center;
+		center.x = 1920/2;
+		center.y = 1080/2;
+		return center;
+	}
 	printf("ENEMY POS: [%d, %d]\n", enemy_pos.x, enemy_pos.y);
 	return enemy_pos;
 }
@@ -433,7 +494,7 @@ int	get_red_square_pos(Rgb color_matrix[1080][1920], int pixel_pattern_length, i
 	if (red_square_counter < 1)
 	{
 		printf("COULD NOT FIND ANY RED SQUARE ON MAP\n");
-		return 1;
+		return red_square_counter;
 	}
 	printf("RED SQUARE POS: [%d, %d]\n", red_square_pos.x, red_square_pos.y);
 	return red_square_counter;
@@ -557,25 +618,65 @@ int	is_my_turn(WinManager *wm)
 	return 0;
 }
 
-int	check_enemy_life(WinManager *wm)
+// capture la zone de l'ecran a comparer
+// extrait la suite de Rgb a comparer
+// compare avec pattern_match
+
+int	compares_rgb_sequences(WinManager *wm, Rgb *ref_pattern, int pattern_len, Rectangle zone_r, int tolerance)
+{
+	// capture de la zone de l'ecran
+	XImage *img = get_zone_to_check(wm, zone_r);
+	if (!img)
+	{
+		fprintf(stderr, "comapre_rgb_sequences : XGetImage failed\n");
+		return 0;
+	}
+
+	// copie de la zone danns un tableau temp[]
+	Rgb temp[pattern_len];
+	for (int i = 0; i < pattern_len; i++)
+	{
+		unsigned long px = XGetPixel(img, i, 0);
+		temp[i] = convert_pixel_to_rgb(img, px);
+	}
+		
+	// simule de la matrice (cast)
+	Rgb (*row)[1920] = (Rgb (*)[1920])temp;
+	bool match_found = pattern_match(row, ref_pattern, pattern_len, 0, 0, tolerance);
+	return match_found ? 1 : 0;
+}
+
+int	check_enemy_life(WinManager *wm, Rgb color_matrix[1080][1920])
+{
+	Rectangle life_zone = create_rectangle(1556, 836, 7, 1);
+	int life_bar_match = compares_rgb_sequences(wm, blue_color_pattern, 7, life_zone, 3);
+	if (life_bar_match){
+		printf("ENEMY DEAD\n");
+		return 0;
+	}
+	else 
+	{
+		printf("ENEMY ALIVE\n");
+		return 1;
+	}
+}
+
+int end_of_fight(WinManager *wm)
 {
 	int tolerance = 3;
-	Rectangle life_zone = create_rectangle(1556, 836, 7, 1);
-	XImage* life_zone_image = get_zone_to_check(wm, life_zone);
-	for (int i = 0; i < life_zone.width; i++)
+	Rectangle r = create_rectangle(1326, 723, 1, 1);
+	XImage* img = get_zone_to_check(wm, r);
+	unsigned long pixel = XGetPixel(img, 0, 0);
+	Rgb rgb = convert_pixel_to_rgb(img, pixel);
+	if (abs(rgb.r - 255 ) > tolerance)
 	{
-		unsigned long pixel = XGetPixel(life_zone_image, i, life_zone.height);
-		Rgb rgb = convert_pixel_to_rgb(life_zone_image, pixel);
-		if (abs(rgb.b - blue_color.b) < tolerance)
-		{
-			printf("Enemy is dead\n");
-			return 1;
-		}
-		else
-		{
-			printf("Enemy isnt dead yet\n");
-			return 2;
-		}
+		printf("Cannot see the end combat window\n");
+		return 0;
+	}
+	else
+	{
+		printf("End fight window spoted\n");
+		return 1;
 	}
 	return 0;
 }

@@ -48,13 +48,16 @@ void fake_click(WinManager *wm, int button, Bool down)
 void	click(WinManager *wm, int x, int y)
 {
 	move_mouse(wm, x, y);
+	sleep(1);
 	fake_click(wm, 1, True);
+	sleep(1);
 }
 
 void	double_click(WinManager *wm, int x, int y)
 {
-	click(wm, x, y);
+	move_mouse(wm, x, y);
+	fake_click(wm, 1, True);
 	sleep(.1);
-	click(wm, x, y);
+	fake_click(wm, 1, True);
 }
 

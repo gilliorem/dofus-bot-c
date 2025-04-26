@@ -4,7 +4,7 @@
 #include "mouse_manager.h"
 #include "window_manager.h"
 
-void	equip_faux(WinManager *wm);
+void	equip_scythe(WinManager *wm);
 int	open_inventory(WinManager *wm);
 void	close_iventory(WinManager *wm);	
 void	reap(WinManager *wm, int x, int y);

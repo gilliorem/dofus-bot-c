@@ -35,29 +35,29 @@ void	run()
 				click_ready_button(wm);
 				sleep(15);
 				while (1)
-					if (move_towards_enemy(wm, color_matrix) == 1)
+					if (move_towards_enemy_x(wm, color_matrix) == 1)
 						break;
 				player_pos = find_player(mandrage_color_pattern, color_matrix, 3, 3);
 				enemy_pos = find_enemy(color_matrix, scarecrow_hat_dark_brown, 5, 3);
-				boost(wm, player_pos);
+				//boost(wm, player_pos);
 				for (int i = 0; i < 2; i ++)
-					attack(wm, enemy_pos);
+					//attack(wm, enemy_pos);
 				end_tour(wm);
-				if (check_enemy_life(wm) == 1)
-					farming = 0;
+				//if (check_enemy_life(wm) == 1)
+				//	farming = 0;
 				while (is_my_turn(wm) != 1)
 					sleep(2);
 				enemy_pos = find_enemy(color_matrix, scarecrow_hat_dark_brown, 5, 3);
-				if (move_towards_enemy(wm, color_matrix) == 1)
+				if (move_towards_enemy_y(wm, color_matrix) == 1)
 				{
-					for (int i = 0; i < 2; i++)
-						attack(wm, enemy_pos);
+					for (int i = 0; i < 2; i++);
+						//attack(wm, enemy_pos);
 				}
-				if (check_enemy_life(wm) == 1)
-					farming = 0;
+				//if (check_enemy_life(wm) == 1)
+				//	farming = 0;
 			case 3:
 				close_fight_window(wm);
-				equip_faux(wm);
+				equip_scythe(wm);
 				break;
 		}	
 
