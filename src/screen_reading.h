@@ -21,6 +21,7 @@ extern Rgb mandrage_color_pattern[3];
 extern Rgb hop_mob;
 extern Rgb blue_color;
 extern Rgb red_color_pattern[36];
+extern Rgb blue_color_pattern[36];
 extern Rgb scarecrow_hat_dark_brown;
 
 Rgb* red_circle_pattern(int len);
@@ -44,6 +45,7 @@ int	find_matching_pattern(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], 
 Point	find_player(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance);
 Point	find_enemy(Rgb color_matrix[1080][1920],Rgb enemy_color, int pixel_pattern_length, int tolerance);
 int	get_red_square_pos(Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance, Point player_pos, Point enemy_pos, Point red_square[]);
+int		get_grey_tiles(Rgb color_matrix[1080][1920], int pattern_len, int tolerance, Point grey_tile[]);
 Point	find_closest_placement_to_enemy(Point red_square[], int size, Point enemy_pos);
 int	check_movement_point(WinManager *wm, int tolerance);
 int	is_my_turn(WinManager *wm);

@@ -60,13 +60,43 @@ Rgb hop_keeper = {.r = 0, .b = 50, .g = 0};
 Rgb blue_color = {.r = 0, .b = 255, .g = 0};
 Rgb red_color = {.r = 255, .b = 0, .g = 0};
 
-Rgb blue_color_pattern[6] = {
+Rgb blue_color_pattern[36] = {
  {.r = 0, .b = 255, .g = 0},
  {.r = 0, .b = 255, .g = 0},
  {.r = 0, .b = 255, .g = 0},
  {.r = 0, .b = 255, .g = 0},
  {.r = 0, .b = 255, .g = 0},
- {.r = 0, .b = 255, .g = 0}
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
+ {.r = 0, .b = 255, .g = 0},
 };
 
 Rgb red_color_pattern[36] = {
@@ -105,7 +135,7 @@ Rgb red_color_pattern[36] = {
  {.r = 255, .b = 0, .g = 0},
  {.r = 255, .b = 0, .g = 0},
  {.r = 255, .b = 0, .g = 0},
- {.r = 255, .b = 0, .g = 0}
+ {.r = 255, .b = 0, .g = 0},
 };
 
 Rectangle create_rectangle(int x, int y, unsigned int width, unsigned int height) {
@@ -500,6 +530,79 @@ int	get_red_square_pos(Rgb color_matrix[1080][1920], int pixel_pattern_length, i
 	return red_square_counter;
 }
 
+/* get_grey_tiles() return the number of grey tiles in the current screen,
+ * populate a Point list with all the grey tiles coordinates 
+ * We will use grey_tile[] as an parameter in order to move into the map.
+ */
+int	get_grey_tiles(Rgb color_matrix[1080][1920], int pattern_len, int tolerance, Point grey_tile[])
+{
+	Rgb light_grey_tile_pattern[pattern_len];
+	Rgb dark_grey_tile_pattern[pattern_len];
+	int tile_counter = 0;
+	int match = 0;
+
+	for (int i = 0; i < pattern_len; i++)
+	{
+		light_grey_tile_pattern[i].r = 131;
+		light_grey_tile_pattern[i].g = 135;
+		light_grey_tile_pattern[i].b = 141;
+
+		dark_grey_tile_pattern[i].r = 118;
+		dark_grey_tile_pattern[i].g = 122;
+		dark_grey_tile_pattern[i].b = 127;
+	}
+	Point grey_tile_pos;
+	for (int y = 0; y  < 791; y++)
+	{
+		for (int x = 0; x < 1359 - pattern_len; x++)
+		{
+			match = 0;
+			for (int i = 0; i < pattern_len; i++)
+			{
+				Rgb pixel = color_matrix[y][x+i];
+				Rgb light_ref = light_grey_tile_pattern[i];
+				Rgb dark_ref = dark_grey_tile_pattern[i];
+
+				if (abs(pixel.r - light_ref.r) < tolerance
+				&& abs(pixel.g - light_ref.g) < tolerance
+				&& abs(pixel.b - light_ref.b) < tolerance)
+				{
+					match++;
+				}
+				else if (abs(pixel.r - dark_ref.r) < tolerance
+				&& abs(pixel.g - dark_ref.g) < tolerance
+				&& abs(pixel.b - dark_ref.b) < tolerance)
+				{
+					match++;
+				}
+				else
+					break;
+			}
+			if (match == pattern_len)
+			{
+				grey_tile[tile_counter].x = x + (pattern_len/ 2);
+				grey_tile[tile_counter].y = y;
+				tile_counter++;
+				grey_tile_pos.x = x + (pattern_len / 2);
+				grey_tile_pos.y = y;
+			}
+		}
+	}
+	printf("FOUND A TOTAL OF %d TILES ACROSS THE SCREEN\n", tile_counter);
+	if (tile_counter < 1)
+	{
+		printf("COULD NOT FIND ANY TILE ON MAP\n");
+		return tile_counter;
+	}
+	printf("TILES POS: [%d, %d]\n", grey_tile_pos.x, grey_tile_pos.y);
+	return tile_counter;
+}
+
+// on va tenter de verifier notre move a partir des grey tiles
+
+
+
+
 // this function will return the smallest distance between player enemy
 // it will go through each red square and do the difference with enemy x and y
 // it takes a list of red square,its size and the enemy position
@@ -648,8 +751,8 @@ int	compares_rgb_sequences(WinManager *wm, Rgb *ref_pattern, int pattern_len, Re
 
 int	check_enemy_life(WinManager *wm, Rgb color_matrix[1080][1920])
 {
-	Rectangle life_zone = create_rectangle(1556, 836, 7, 1);
-	int life_bar_match = compares_rgb_sequences(wm, blue_color_pattern, 7, life_zone, 3);
+	Rectangle life_zone = create_rectangle(1556, 836, 6, 1);
+	int life_bar_match = compares_rgb_sequences(wm, blue_color_pattern, 6, life_zone, 3);
 	if (life_bar_match){
 		printf("ENEMY DEAD\n");
 		return 0;

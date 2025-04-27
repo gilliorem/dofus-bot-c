@@ -109,39 +109,58 @@ void	move(WinManager *wm, int x, int y)
 	XSync(wm->display, False);
 }
 
-// on va faire 2 nouvelles fonctions : 
-// on va regarder ou se trouve notre joueur
-// on va regarder ou se trouve l'ennemi
-// on va transformer en terme de case
-// pour transformer en dalle : il nous faut reperer le pattern dalle (il y en a 2)
-// attention je vois un probleme : notre joueur cache les dales : on peut modifier ca en 
-// enft on va faire comme dans la fonction qui detectent les red squares
-// en masquant nos joueurs et en ayant seuelemt les cercles 
-// donc par exemple je suis en 600, 550
-
-// light & dark grey tile pattern ; 93 px de large
-// une fois qu'on trouve un pattern on le met dans un tableau de Point ?
-// ou alors on fait une nouvelle struct qui est Tile qui fait la conversion
-// une tile c'est donc 93 de large et 47 de haut
-
-// fonction qui traduit les coordonnes x,y en tile
-// qui dessine le board en 10*10 par ex
-
-int get_board()
+int	get_in_range_tile(WinManager *wm, Point grey_tile[], int grey_tiles, Point player, Point in_range_tile[])
 {
-	
+	int counter = 0;
+	for (int i = 0; i < grey_tiles; i++)
+	{
+		if (abs(player.x - grey_tile[i]. x) < (400/2) && abs(player.y - grey_tile[i].y) < (220 / 2))
+		{
+			in_range_tile[counter].x = grey_tile[i].x;
+			in_range_tile[counter].y = grey_tile[i].y;
+			printf("tile in range %d %d \n", grey_tile[i].x, grey_tile[i].y);
+			counter++;
+		}
+	}
+	printf("TILES IN RANGE : %d\n", counter);
+	return counter;
 }
+
+void	move_in_tile(WinManager *wm, int tiles_in_range, Point in_range_tile[], Point player, Point enemy)
+{
+	printf("playerX : %d\n", player.x);
+	printf("enemyX : %d\n", enemy.x);
+	for (int i = 0; i < tiles_in_range; i++)	
+	{
+		if (player.x < enemy.x && in_range_tile[i].x > player.x && counter < 1)
+		{
+			move(wm, in_range_tile[i].x, in_range_tile[i].y);
+			counter++;
+		}
+		else if (player.x > enemy.x && in_range_tile[i].x < player.x)
+			move(wm, in_range_tile[i].x, in_range_tile[i].y);
+		else if (player.y < enemy.y && in_range_tile[i].y > player.y)
+			move()
+		sleep(1);
+	}
+}
+
+//on peut juste ressortir notre nouveau tableau de points in range et faire une autre fonction
+//qui 
+
+// on va juste prendre toutes les tiles, et les mettre dans un tableau point et on 
+// se passera la tableau point comme on se passe le Point du joueur et de l'ennemi
 
 int	move_towards_enemy_x(WinManager *wm, Rgb color_matrix[1080][1920])
 {
 	int counter = 0;
 	Point player = find_player(red_color_pattern, color_matrix, 32, 2);
 	Point enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 10, 2);
-	while (abs(player.x - enemy.x) > 80 || counter > 4)
+	while (abs(player.x - enemy.x) > 99 || counter > 4)
 	{
 		build_color_matrix(wm, color_matrix);
 		player = find_player(red_color_pattern, color_matrix, 32, 2);
-		enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 10, 2);
+		enemy = find_enemy(color_matrix, blue_color, 32, 2);
 		if ((player.x - enemy.x) < 105 && (player.x - enemy.x) > 49)
 		{
 			move(wm, player.x - 45, player.y + 25);
