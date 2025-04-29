@@ -18,13 +18,13 @@ void	placement(WinManager *wm, Rgb color_matrix[1080][1920]);
 void	click_ready_button(WinManager *wm);
 void	move(WinManager *wm, int x, int y);
 int	get_in_range_tile(WinManager *wm, Point grey_tile[], int grey_tiles, Point player, Point in_range_tile[]);
-void	move_in_tile(WinManager *wm, int tiles_in_range, Point in_range_tile[], Point player, Point enemy);
+int	move_in_tile(WinManager *wm, Rgb color_matrix[1080][1920], Point grey_tile[], int tiles_in_range, Point in_range_tile[]);
 int	move_towards_enemy_x(WinManager *wm, Rgb color_matrix[1080][1920]);
 int	move_towards_enemy_y(WinManager *wn, Rgb color_matrix[1080][1920]);
 void	boost(WinManager *wm, Rgb color_matrix[1080][1920]);
 void	attack(WinManager *wm, Rgb color_matrix[1080][1920]);
 void	end_tour(WinManager *wm);
 void	close_fight_window(WinManager *wm);
-
+int		move_in_range(WinManager *wm, Rgb color_matrix[1080][1920], Point grey_tile[], int grey_tiles);
 #endif
 

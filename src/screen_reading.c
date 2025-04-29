@@ -7,6 +7,7 @@
 
 Rgb orange_button = {.r = 255, .g = 102, .b = 0};
 Rgb ok_orange_button = {.r = 255, .g = 97, .b = 0};
+Rgb grey = {.r = 213, .g = 207, .b = 170};
 Rgb log_in_button = {.r = 242, .g = 146, .b = 0};
 Rgb wheat = {.r = 56, .g = 62, .b = 15};
 
@@ -303,11 +304,15 @@ int	ok_button_visible(WinManager *wm)
 {
 	Rectangle ok_button_zone = create_rectangle(900, 477, 200, 50);
 	XImage *ok_button_image = get_zone_to_check(wm, ok_button_zone);
-	if (check_orange_context_menu_color(ok_button_image, ok_orange_button, 3) > 100)
+	if (check_orange_context_menu_color(ok_button_image, ok_orange_button, 20) > 30)
 	{
 		printf("OK BUTTON found\n");
 		return 1;
 	}
+	else if (check_orange_context_menu_color(ok_button_image, orange_button, 15) > 30)
+		return 1;
+	else if (check_orange_context_menu_color(ok_button_image, grey, 15) > 30)
+		return 1;
 	printf("COULD NOT SEE OK BUTTON keep fauching!\n");
 	return 0;
 }
@@ -373,7 +378,7 @@ bool	pattern_match(Rgb color_matrix[1080][1920], Rgb *ref_color_pattern, int pat
 	return matching_pattern;
 }
 
-int	find_matching_pattern(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pattern_length, int tolerance, Point matches[216])
+int	find_matching_pattern(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pattern_length, int tolerance, Point matches[])
 {
 	int	match_counter = 0;
 	for (int y = 0; y < 1080; y++)
@@ -391,7 +396,7 @@ int	find_matching_pattern(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], 
 	return match_counter;
 }
 
-Point	find_player(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pixel_pattern_length, int tolerance)
+Point	find_player(Rgb color_matrix[1080][1920], Rgb *ref_color_pattern, int pixel_pattern_length, int tolerance)
 {
 	Point player_pos;
 	int same_pattern_counter = 0;
@@ -416,8 +421,8 @@ Point	find_player(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pixe
 			if (match)
 			{
 				same_pattern_counter++;
-				player_pos.x = x;
-				player_pos.y = y;
+				player_pos.x = x + 18;
+				player_pos.y = y - 14;
 			}
 		}
 	}
@@ -434,7 +439,7 @@ Point	find_player(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pixe
 	return player_pos;
 }
 
-Point	find_enemy(Rgb color_matrix[1080][1920], Rgb enemy_color, int pixel_pattern_length, int tolerance)
+Point	find_enemy(Rgb color_matrix[1080][1920], Rgb *ref_color_pattern, int pixel_pattern_length, int tolerance)
 {
 	Point enemy_pos;
 	int same_pattern_counter = 0;
@@ -447,9 +452,10 @@ Point	find_enemy(Rgb color_matrix[1080][1920], Rgb enemy_color, int pixel_patter
 			for (int i = 0; i < pixel_pattern_length; i++)
 			{
 				Rgb pixel = color_matrix[y][x+i];
-				if  (abs(pixel.r - enemy_color.r) > tolerance
-				|| abs(pixel.g - enemy_color. g) > tolerance
-				|| abs(pixel.b - enemy_color.b) > tolerance)
+				Rgb ref = ref_color_pattern[i];
+				if  (abs(pixel.r - ref.r) > tolerance
+				|| abs(pixel.g - ref. g) > tolerance
+				|| abs(pixel.b - ref.b) > tolerance)
 				{
 					match = false;
 					break;
@@ -458,8 +464,8 @@ Point	find_enemy(Rgb color_matrix[1080][1920], Rgb enemy_color, int pixel_patter
 			if (match)
 			{
 				same_pattern_counter++;
-				enemy_pos.x = x;
-				enemy_pos.y = y + 60;
+				enemy_pos.x = x + 18;
+				enemy_pos.y = y - 14;
 			}
 		}
 	}
@@ -533,6 +539,7 @@ int	get_red_square_pos(Rgb color_matrix[1080][1920], int pixel_pattern_length, i
 /* get_grey_tiles() return the number of grey tiles in the current screen,
  * populate a Point list with all the grey tiles coordinates 
  * We will use grey_tile[] as an parameter in order to move into the map.
+ * PATTERN MESURE : LIGHT GREY 93 DARK GREY : 92
  */
 int	get_grey_tiles(Rgb color_matrix[1080][1920], int pattern_len, int tolerance, Point grey_tile[])
 {
@@ -598,10 +605,107 @@ int	get_grey_tiles(Rgb color_matrix[1080][1920], int pattern_len, int tolerance,
 	return tile_counter;
 }
 
-// on va tenter de verifier notre move a partir des grey tiles
+// pattern length : 93
+int	get_light_grey_tiles(Rgb color_matrix[1080][1920], int pattern_len, int tolerance, Point grey_tile[])
+{
+	Point grey_tile_pos;
+	Rgb light_grey_tile_pattern[pattern_len];
+	int tile_counter = 0;
+	bool match = false;
+	for (int i = 0; i < pattern_len; i++)
+	{
+		light_grey_tile_pattern[i].r = 131;
+		light_grey_tile_pattern[i].g = 135;
+		light_grey_tile_pattern[i].b = 141;
 
+	}
+	for (int y = 0; y  < 790; y++)
+	{
+		for (int x = 0; x < 1800 - pattern_len; x++)
+		{
+			match = true;
+			for (int i = 0; i < pattern_len; i++)
+			{
+				Rgb pixel = color_matrix[y][x+i];
+				Rgb light_ref = light_grey_tile_pattern[i];
 
+				if (abs(pixel.r - light_ref.r) > tolerance
+				|| abs(pixel.g - light_ref.g) > tolerance
+				|| abs(pixel.b - light_ref.b) > tolerance)
+				{
+					match = false;
+					break;
+				}
+			}
+			if (match) 
+			{
+				grey_tile[tile_counter].x = x + (pattern_len/ 2);
+				grey_tile[tile_counter].y = y;
+				tile_counter++;
+				grey_tile_pos.x = x + (pattern_len / 2);
+				grey_tile_pos.y = y;
+			}
+		}
+	}
+	printf("FOUND A TOTAL OF %d LIGHT TILES ACROSS THE SCREEN\n", tile_counter);
+	if (tile_counter < 1)
+	{
+		printf("COULD NOT FIND ANY LIGHT TILE ON MAP\n");
+		return tile_counter;
+	}
+	return tile_counter;
+}
 
+/* pattern length pour les dark : 92 */
+int	get_dark_grey_tiles(Rgb color_matrix[1080][1920], int pattern_len, int tolerance, Point grey_tile[])
+{
+	Point grey_tile_pos;
+	Rgb dark_grey_tile_pattern[pattern_len];
+	int tile_counter = get_light_grey_tiles(color_matrix, pattern_len, tolerance, grey_tile);
+	bool match = false;
+
+	for (int i = 0; i < pattern_len; i++)
+	{
+		dark_grey_tile_pattern[i].r = 118;
+		dark_grey_tile_pattern[i].g = 122;
+		dark_grey_tile_pattern[i].b = 127;
+	}
+	for (int y = 0; y  < 791; y++)
+	{
+		for (int x = 0; x < 1800 - pattern_len; x++)
+		{
+			match = true;
+			for (int i = 0; i < pattern_len; i++)
+			{
+				Rgb pixel = color_matrix[y][x+i];
+				Rgb dark_ref = dark_grey_tile_pattern[i];
+
+				if (abs(pixel.r - dark_ref.r) > tolerance
+				|| abs(pixel.g - dark_ref.g) > tolerance
+				|| abs(pixel.b - dark_ref.b) > tolerance)
+				{
+					match = false;
+					break;
+				}
+			}
+			if (match)
+			{
+				grey_tile[tile_counter].x = x + (pattern_len/ 2);
+				grey_tile[tile_counter].y = y;
+				tile_counter++;
+				grey_tile_pos.x = x + (pattern_len / 2);
+				grey_tile_pos.y = y;
+			}
+		}
+	}
+	printf("FOUND A TOTAL OF %d DARK TILES ACROSS THE SCREEN\n", tile_counter);
+	if (tile_counter < 1)
+	{
+		printf("COULD NOT FIND ANY DARK TILE ON MAP\n");
+		return tile_counter;
+	}
+	return tile_counter;
+}
 
 // this function will return the smallest distance between player enemy
 // it will go through each red square and do the difference with enemy x and y
@@ -610,9 +714,8 @@ Point	find_closest_placement_to_enemy(Point red_square[], int size, Point enemy_
 {
 	Point placement;
 	int distances[size]; 
-	int distance = 0;
-	printf("ENEMY POS : (%d, %d)\n", enemy_pos.x, enemy_pos.y);
 	int smallest_distance = 0;
+	printf("ENEMY POS : (%d, %d)\n", enemy_pos.x, enemy_pos.y);
 	for (int i = 0; i < size; i++)
 	{
 		distances[i] = abs(red_square[i].x - enemy_pos.x);

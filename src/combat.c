@@ -4,6 +4,7 @@
 #include "types.h"
 #include "combat.h"
 #include "screen_reading.h"
+#include <unistd.h>
 
 //ajouter un check pour voir si l'arme est deja equipee
 // weapon etant dans ce cas l'arme de cac (ici, marteau bouftou)
@@ -89,8 +90,8 @@ void placement(WinManager *wm, Rgb color_matrix[1080][1920])
 {
 	build_color_matrix(wm, color_matrix);
 	Point red_square[50];
-	Point player_pos = find_player(mandrage_color_pattern, color_matrix, 3, 5);
-	Point enemy_pos = find_enemy (color_matrix, scarecrow_hat_dark_brown, 9, 2);
+	Point player_pos = find_player(color_matrix, red_color_pattern, 35, 5);
+	Point enemy_pos = find_enemy (color_matrix, blue_color_pattern, 35, 5);
 	int red_squares = get_red_square_pos(color_matrix, 88, 3, player_pos, enemy_pos, red_square);
 	if (red_squares < 1)
 		return;
@@ -103,9 +104,9 @@ void placement(WinManager *wm, Rgb color_matrix[1080][1920])
 void	move(WinManager *wm, int x, int y)
 {
 	move_mouse(wm, x, y); 
-	sleep(.5);
+	usleep(100000);
 	fake_click(wm, 1, True);
-	sleep(1);
+	usleep(50000);
 	XSync(wm->display, False);
 }
 
@@ -114,7 +115,7 @@ int	get_in_range_tile(WinManager *wm, Point grey_tile[], int grey_tiles, Point p
 	int counter = 0;
 	for (int i = 0; i < grey_tiles; i++)
 	{
-		if (abs(player.x - grey_tile[i]. x) < (400/2) && abs(player.y - grey_tile[i].y) < (220 / 2))
+		if (abs(player.x - grey_tile[i]. x) < (250/2) && abs(player.y - grey_tile[i].y) < (150 / 2))
 		{
 			in_range_tile[counter].x = grey_tile[i].x;
 			in_range_tile[counter].y = grey_tile[i].y;
@@ -126,41 +127,132 @@ int	get_in_range_tile(WinManager *wm, Point grey_tile[], int grey_tiles, Point p
 	return counter;
 }
 
-void	move_in_tile(WinManager *wm, int tiles_in_range, Point in_range_tile[], Point player, Point enemy)
+/* valeurs de deplacement de 3PM +- 146x 74y 
+ * -290 x
+ * Rectangle de deplacement joueur : (pX, pY, 388, 153) 
+ * case 1: dX 146 dY 74
+ * case 2: dX -290 dY 74
+ * case 3: dX 146 dY -74
+ * case 4: dX -290 dY -74
+ *  */
+
+int	move_in_range(WinManager *wm, Rgb color_matrix[1080][1920], Point grey_tile[], int grey_tiles)
 {
-	printf("playerX : %d\n", player.x);
-	printf("enemyX : %d\n", enemy.x);
-	for (int i = 0; i < tiles_in_range; i++)	
+	int tiles = 0;
+	Point player = find_player(color_matrix, red_color_pattern, 34, 5);
+	Point enemy = find_enemy(color_matrix, blue_color_pattern, 34, 5);
+	int dx, dy = 0; 
+	int row, col = 0;
+	int tileX, tileY = 0;
+	int tolerance = 10;
+	Point in_range_tile[16];
+	for (int i = 0; i < grey_tiles; i++)
 	{
-		if (player.x < enemy.x && in_range_tile[i].x > player.x && counter < 1)
+		tileX = grey_tile[i].x;
+		tileY = grey_tile[i].y;
+		dx = player.x - tileX;
+		dy = player.y - tileY;
+		col = tileX / 92;
+		row = tileY / 47;
+		if (abs(grey_tile[i].x)< 1801 && abs(grey_tile[i].y) < 800)
 		{
-			move(wm, in_range_tile[i].x, in_range_tile[i].y);
-			counter++;
+			if ((abs(dx) > 140 && abs(dx) < 155 && abs(dy) > 70 && abs(dy) < 80) || (abs(dx) > 285 && abs(dx) < 296 && abs(dy) > 70 && abs(dy) < 80))
+			{
+				in_range_tile[i].x = tileX;
+				in_range_tile[i].y = tileY;
+				printf("%dDX, %dDY\n", dx, dy);
+				printf("TILEX %d TILEY %d\n", tileX, tileY);
+				printf("Col %d Row %d\n", col, row);
+				tiles++;
+			}
+			move(wm, in_range_tile[0].x, in_range_tile[0].y);
 		}
-		else if (player.x > enemy.x && in_range_tile[i].x < player.x)
-			move(wm, in_range_tile[i].x, in_range_tile[i].y);
-		else if (player.y < enemy.y && in_range_tile[i].y > player.y)
-			move()
-		sleep(1);
 	}
+	return tiles;
 }
 
-//on peut juste ressortir notre nouveau tableau de points in range et faire une autre fonction
-//qui 
+int	move_in_tile(WinManager *wm, Rgb color_matrix[1080][1920], Point grey_tile[], int grey_tiles, Point in_range_tile[])
+{
+	Point player = find_player(color_matrix, red_color_pattern, 30, 2);
+	Point enemy = find_enemy(color_matrix, blue_color_pattern, 30, 2);
+	/* j'ai aussi besoin de re-calculer apres chaque mouvement du perso les in_range_tile */
+	int tiles_in_range = get_in_range_tile(wm, grey_tile, grey_tiles, player, in_range_tile);
+	printf("playerX : %d\n", player.x);
+	printf("enemyX : %d\n", enemy.x);
+	/* l'idee c'est de ne pas faire 2 fois la meme action : ne pas aller 2 fois
+	 * pour ca j'incremente un counter a chaque action
+	 * et le reset a l'action suivante 
+	 * ne pas oublier que c'est une fonction qui etre appeler x fois jusqu'a ce que le
+	 * joueur se retrouve avec un x et un y proche. 
+	 * du coup je pense que je devrai partir sur le while ici 
+	 * logic d'enum a utiliser quand on aura run ce code 
+	*/
+	int dx = player.x - enemy.x;
+	int dy = player.y - enemy.y;
+	printf("dx : %d\n", dx);
+	printf("dy : %d\n", dy);
+	while (1)
+	{
+		printf("je suis dans le while\n");
+		build_color_matrix(wm, color_matrix);
+		player = find_player(color_matrix, red_color_pattern, 36, 3);
+		enemy = find_enemy(color_matrix, blue_color_pattern, 36, 3);
+		dx = player.x - enemy.x;
+		dy = player.y - enemy.y;
+		printf("playerX : %d\n", player.x);
+		printf("enemyX : %d\n", enemy.x);
+		printf("dx : %d\n", dx);
+		printf("dy : %d\n", dy);
+		tiles_in_range = get_in_range_tile(wm, grey_tile, grey_tiles, player, in_range_tile);
+		for (int i = 0; i < tiles_in_range; i++)	
+		{
+			/* pour l'instant on ne va pas se deplacer de maniere la plus optimisee (surement 1PM)
+			 * mais c'est ok, on test.
+			 * cas 1 : le joueur est 'a gauche' de l'ennemi */
+			if (player.x < enemy.x && in_range_tile[i].x > player.x )
+			{
+				move(wm, in_range_tile[i].x, in_range_tile[i].y);
+				end_tour(wm);
+				break;
+			}
+			/* cas 2 : le joueur est 'a droite' de l'ennemi */
+			if (player.x > enemy.x && in_range_tile[i].x < player.x )
+			{
+				move(wm, in_range_tile[i].x, in_range_tile[i].y);
+				end_tour(wm);
+				break;
 
-// on va juste prendre toutes les tiles, et les mettre dans un tableau point et on 
-// se passera la tableau point comme on se passe le Point du joueur et de l'ennemi
+			}
+			/* cas 3 : le joueur est 'au dessus' de l'ennemi */ 
+			if (player.y < enemy.y && in_range_tile[i].y > player.y) 
+			{
+				move(wm, in_range_tile[i].x, in_range_tile[i].y);
+				end_tour(wm);
+				break;
+			}
+			if (player.y > enemy.y && in_range_tile[i].y < player.y )
+			{
+				move(wm, in_range_tile[i].x, in_range_tile[i].y);
+				end_tour(wm);
+				break;
+			}
+		}
+		if (abs(dx) < 50 && abs(dy) < 35)
+			break;
+	}
+	return 0;
+}
 
 int	move_towards_enemy_x(WinManager *wm, Rgb color_matrix[1080][1920])
 {
 	int counter = 0;
-	Point player = find_player(red_color_pattern, color_matrix, 32, 2);
-	Point enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 10, 2);
+	Point player = find_player(color_matrix, red_color_pattern, 36, 2);
+	Point enemy = find_enemy(color_matrix, blue_color_pattern, 36, 2);
 	while (abs(player.x - enemy.x) > 99 || counter > 4)
 	{
 		build_color_matrix(wm, color_matrix);
-		player = find_player(red_color_pattern, color_matrix, 32, 2);
-		enemy = find_enemy(color_matrix, blue_color, 32, 2);
+		player = find_player(color_matrix, red_color_pattern, 36, 2);
+		enemy = find_enemy(color_matrix, blue_color_pattern, 36, 2);
 		if ((player.x - enemy.x) < 105 && (player.x - enemy.x) > 49)
 		{
 			move(wm, player.x - 45, player.y + 25);
@@ -173,7 +265,7 @@ int	move_towards_enemy_x(WinManager *wm, Rgb color_matrix[1080][1920])
 			move(wm, player.x - 135, player.y + 80);
 			sleep(2);
 			build_color_matrix(wm, color_matrix);
-			Point new_player = find_player(red_color_pattern, color_matrix, 32, 2);
+			Point new_player = find_player(color_matrix, red_color_pattern, 36, 2);
 			if (new_player.x == player.x)
 				move(wm, player.x - 45, player.y + 25);
 			click(wm, 1200, 1040);
@@ -193,7 +285,7 @@ int	move_towards_enemy_x(WinManager *wm, Rgb color_matrix[1080][1920])
 			move(wm, player.x + 135, player.y - 80);
 			sleep(2);
 			build_color_matrix(wm, color_matrix);
-			Point new_player = find_player(red_color_pattern, color_matrix, 32, 2);
+			Point new_player = find_player(color_matrix, red_color_pattern, 36, 2);
 			if (new_player.x == player.x)
 				move(wm, player.x + 45, player.y - 25);	
 			printf("Player has moved in (%d, %d)\n", new_player.x, new_player.y);
@@ -209,13 +301,13 @@ int	move_towards_enemy_x(WinManager *wm, Rgb color_matrix[1080][1920])
 int	move_towards_enemy_y(WinManager *wm, Rgb color_matrix[1080][1920])
 {
 	int counter = 0;
-	Point player = find_player(red_color_pattern, color_matrix, 32, 2);
-	Point enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 10, 2);
+	Point player = find_player(color_matrix, red_color_pattern, 36, 5);
+	Point enemy = find_enemy(color_matrix, blue_color_pattern, 36, 5);
 	while (abs(player.y - enemy.y) > 80 || counter > 4)
 	{
 		build_color_matrix(wm, color_matrix);
-		player = find_player(red_color_pattern, color_matrix, 32, 2);
-		enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 10, 2);
+		player = find_player(color_matrix, red_color_pattern, 36, 5);
+		enemy = find_enemy(color_matrix, blue_color_pattern, 36, 5);
 		if ((player.y - enemy.y) < 50 && (player.y - enemy.y) > 40)
 		{
 			move(wm, player.x - 66, player.y - 30);
@@ -227,7 +319,7 @@ int	move_towards_enemy_y(WinManager *wm, Rgb color_matrix[1080][1920])
 			move(wm, player.x - 145, player.y - 75);
 			counter++;
 			sleep(2);
-			player = find_player(red_color_pattern, color_matrix, 32, 2);
+			player = find_player(color_matrix, red_color_pattern, 36, 5);
 			printf("Player has moved in (%d, %d)\n", player.y, player.y);
 			click(wm, 1200, 1040);
 			sleep(15);
@@ -243,7 +335,7 @@ int	move_towards_enemy_y(WinManager *wm, Rgb color_matrix[1080][1920])
 			move(wm, player.x + 145, player.y + 60);
 			counter++;
 			sleep(2);
-			player = find_player(red_color_pattern, color_matrix, 32, 2);
+			player = find_player(color_matrix, red_color_pattern, 36, 5);
 			printf("Player has moved in (%d, %d)\n", player.x, player.y);
 			click(wm, 1200, 1040);
 			sleep(15);
@@ -256,7 +348,7 @@ int	move_towards_enemy_y(WinManager *wm, Rgb color_matrix[1080][1920])
 void	boost(WinManager *wm, Rgb color_matrix[1080][1920])
 {
 	build_color_matrix(wm, color_matrix);
-	Point player = find_player(mandrage_color_pattern, color_matrix, 2, 3);
+	Point player = find_player(color_matrix, red_color_pattern, 36, 5);
 	int x = 1285;
 	for(int i = 0; i < 3; i++)
 	{
@@ -272,7 +364,7 @@ void	attack(WinManager *wm, Rgb color_matrix[1080][1920])
 	while (check_enemy_life(wm, color_matrix) != 0 && end_of_fight(wm) != 1 && is_my_turn(wm) == 1)
 	{
 		build_color_matrix(wm, color_matrix);
-		Point enemy = find_enemy(color_matrix, scarecrow_hat_dark_brown, 9, 4);
+		Point enemy = find_enemy(color_matrix, blue_color_pattern, 36, 5);
 		for (int i = 0; i < 2; i++)
 		{
 			if (check_enemy_life(wm, color_matrix) != 0)

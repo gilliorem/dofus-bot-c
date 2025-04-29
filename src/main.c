@@ -11,40 +11,23 @@
 
 int	main(void)
 {
-
-	//run();
-
 	WinManager *wm = init_bot();
 	Rgb color_matrix[1080][1920];
 	build_color_matrix(wm, color_matrix);
+	Point player = find_player(color_matrix, red_color_pattern, 34, 5);
+	Point enemy = find_enemy(color_matrix, blue_color_pattern, 34, 5);
 	Point grey_tile[300];
-	int grey_tiles = get_grey_tiles(color_matrix, 93, 4, grey_tile);
-	Point in_range_tile[grey_tiles];
-	Point player = find_player(red_color_pattern, color_matrix, 34, 3);
-	int tiles_in_range = get_in_range_tile(wm, grey_tile, grey_tiles, player, in_range_tile);
-	Point enemy_pos = find_enemy(color_matrix, blue_color, 34, 3);
-	move_in_tile(wm, tiles_in_range, in_range_tile, player, enemy_pos);
-/*
-	reap_hop(wm, color_matrix);
-	equip_weapon(wm);
-	placement(wm, color_matrix);
-	boost(wm, color_matrix);
-	attack(wm, color_matrix);
-	close_fight_window(wm);
-
-	for (int i = 0; i < 5; i++)
+	int light_tiles = get_light_grey_tiles(color_matrix, 92, 5, grey_tile);
+	int dark_tiles = get_dark_grey_tiles(color_matrix, 92, 5, grey_tile);
+	int grey_tiles = light_tiles + dark_tiles;
+	while (1)
 	{
-		build_color_matrix(wm, color_matrix);
-		Point player_pos = find_player(mandrage_color_pattern, color_matrix, 2, 3);
-		boost(wm, player_pos);
-		attack(wm, enemy_pos);
-		attack(wm, enemy_pos);
-		end_tour(wm);
-		sleep(10);
+		int in_range_tiles =  move_in_range(wm, color_matrix, grey_tile, grey_tiles);
+		sleep(4);
+		XSync(wm->display, False);
+
 	}
-	close_fight_window(wm);
-*/	
-	sleep(2);
-	XSync(wm->display, False);
 	return (0);
 }
+
+

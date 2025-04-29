@@ -1,3 +1,4 @@
+/*
 #include "log.h"
 #include "window_manager.h"
 #include "mouse_manager.h"
@@ -17,10 +18,9 @@ void	run()
 	//	int farming = 1;
 		
 		int farming = reap_wheat(wm, color_matrix);
-	/*	farming = reap_barley(wm, color_matrix);
+		farming = reap_barley(wm, color_matrix);
 		farming = reap_oat(wm, color_matrix);
 		farming = reap_hop(wm, color_matrix);
-		*/
 		switch (farming)
 		{
 			case 1:
@@ -65,3 +65,5 @@ void	run()
 	sleep(2);
 	XSync(wm->display, False);
 }	
+
+*/
