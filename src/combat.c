@@ -375,7 +375,9 @@ void	find_player_range_tiles(WinManager *wm, Rgb matrix[1080][1920])
 
     /* déjà à portée ? */
     if (abs(p_col - e_col) <= 2 && abs(p_row - e_row) <= 1) {
-        boost(wm, matrix); attack(wm, matrix); return;
+        boost(wm, matrix); 
+	attack(wm, matrix);
+	return;
     }
 
     /* -------- 2. fenêtre tronquée autour du joueur ---------- */
@@ -429,7 +431,8 @@ void	find_player_range_tiles(WinManager *wm, Rgb matrix[1080][1920])
     pixel_to_grid(player, &p_row, &p_col);
 
     if (abs(p_col - e_col) <= 2 && abs(p_row - e_row) <= 1) {
-        boost(wm, matrix); attack(wm, matrix);
+        boost(wm, matrix); 
+	attack(wm, matrix);
     }
 }
 
@@ -445,7 +448,6 @@ void	boost(WinManager *wm, Rgb color_matrix[1080][1920])
 		click(wm, player.x, player.y);
 		x+= 50;
 	}
-	end_tour(wm);
 }
 
 void	attack(WinManager *wm, Rgb color_matrix[1080][1920])

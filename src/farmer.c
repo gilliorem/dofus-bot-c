@@ -51,7 +51,7 @@ void	reap_f(WinManager *wm, int x, int y)
 	move_mouse(wm, x+=40, y+=100);
 	sleep(1);
 	fake_click(wm, 1, True);
-	sleep(13);
+	sleep(8);
 }
 
 int	reap_wheat(WinManager *wm, Rgb color_matrix[1080][1920])
@@ -189,6 +189,9 @@ int	reap_flax(WinManager *wm, Rgb color_matrix[1080][1920])
 			equip_weapon(wm);
 		return 1;
 	}
+	Point player_pos = find_player(color_matrix, red_color_pattern, 34, 5);
+	if (player_pos.x != 1920/2)
+		return 1;
 	ok_button_visible(wm);
 	Point flax[216];
 	int flaxs = find_matching_pattern(flax_color_pattern, color_matrix, 3, 8, flax);

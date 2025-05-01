@@ -18,7 +18,7 @@ int	main(void)
 
 	while (1)
 	{
-		if (reap_hop(wm, color_matrix))
+		if (reap_flax(wm, color_matrix))
 		{
 			placement(wm, color_matrix);
 			find_player_range_tiles(wm, color_matrix);
