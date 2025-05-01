@@ -12,6 +12,7 @@ int	reap_wheat(WinManager *wm, Rgb color_matrix[1080][1920]);
 int	reap_barley(WinManager *wm, Rgb color_matrix[1080][1920]);
 int	reap_oat(WinManager *wm, Rgb color_matrix[1080][1920]);
 int	reap_hop(WinManager *wm, Rgb color_matrix[1080][1920]);
+int	reap_flax(WinManager *wm, Rgb color_matrix[1080][1920]);
 
 
 #endif

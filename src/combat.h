@@ -25,6 +25,9 @@ void	boost(WinManager *wm, Rgb color_matrix[1080][1920]);
 void	attack(WinManager *wm, Rgb color_matrix[1080][1920]);
 void	end_tour(WinManager *wm);
 void	close_fight_window(WinManager *wm);
-int		move_in_range(WinManager *wm, Rgb color_matrix[1080][1920], Point grey_tile[], int grey_tiles);
+int	move_in_range(WinManager *wm, Rgb color_matrix[1080][1920], Point grey_tile[]);
+void	sword_fate(WinManager *wm, Rgb color_matrix[1080][1920], int x, int y);
+static inline void pixel_to_grid(Point p, int *row, int *col);
+void	find_player_range_tiles(WinManager *wm, Rgb matrix[1080][1920]);
 #endif
 

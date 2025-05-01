@@ -39,7 +39,19 @@ void	reap(WinManager* wm, int x, int y)
 	move_mouse(wm, x+=40, y+=50);
 	sleep(1);
 	fake_click(wm, 1, True);
-	sleep(15);
+	sleep(12);
+}
+
+void	reap_f(WinManager *wm, int x, int y)
+{
+	move_mouse(wm, x, y);
+	sleep(1);
+	fake_click(wm, 1, True);
+	sleep(1);
+	move_mouse(wm, x+=40, y+=100);
+	sleep(1);
+	fake_click(wm, 1, True);
+	sleep(13);
 }
 
 int	reap_wheat(WinManager *wm, Rgb color_matrix[1080][1920])
@@ -142,7 +154,7 @@ int	reap_hop(WinManager *wm, Rgb color_matrix[1080][1920])
 			return 1;
 		if (check_weapon(wm) != WEAPON_SCYTHE)
 			equip_scythe(wm);
-		int hops = find_matching_pattern(hop_color_pattern, color_matrix, 3, 5, hop);
+		int hops = find_matching_pattern(hop_color_pattern, color_matrix, 3, 2, hop);
 		if (hops < 1)
 		{
 			printf("Hop not find\n");
@@ -156,6 +168,70 @@ int	reap_hop(WinManager *wm, Rgb color_matrix[1080][1920])
 				return 1;
 			else if (ok_button_visible(wm) == 1)
 				click(wm, 1230, 480);
+		}
+		open_inventory(wm);
+		if (full_pods(wm) == 1)
+		{
+			close_inventory(wm);
+			return 2;
+		}
+		close_inventory(wm);
+	}
+	return 0;
+}
+
+int	reap_flax(WinManager *wm, Rgb color_matrix[1080][1920])
+{
+	if (ready_button_visible(wm) == 1)
+	{
+		printf("found ready boutton\n");
+		if (check_weapon(wm) != WEAPON_HAMMER)
+			equip_weapon(wm);
+		return 1;
+	}
+	ok_button_visible(wm);
+	Point flax[216];
+	int flaxs = find_matching_pattern(flax_color_pattern, color_matrix, 3, 8, flax);
+	if (flaxs < 1)
+	{
+		printf("FARMER.C no flax found, return 0\n");
+		return 0;
+	}
+	for (int i = 0; i < 10; i++)
+	{
+		build_color_matrix(wm, color_matrix);
+		if (ready_button_visible(wm) == 1)
+		{
+			printf("found ready boutton\n");
+			if (check_weapon(wm) != WEAPON_HAMMER)
+				equip_weapon(wm);
+			return 1;
+		}
+		if (ok_button_visible(wm) == 1)
+			click(wm, 1000, 500);
+		if (check_weapon(wm) != WEAPON_SCYTHE)
+			equip_scythe(wm);
+		flaxs = find_matching_pattern(flax_color_pattern, color_matrix, 3, 8, flax);
+		printf("Found %d flax\n", flaxs);
+		if (i > 2 && flaxs < 3)
+		{
+			printf("2 SCANS LESS THAN 3 FLAXS. RETURN 0\n");
+			return 0;
+		}
+		if (flaxs < 1)
+		{
+			printf("Flax not find\n");
+			return 0;
+		}
+		for (int i = 1; i < flaxs; i++)
+		{
+			click(wm, 1639, 1028);
+			printf("Found flax in (%d %d)\n", flax[i].x, flax[i].y);
+			reap_f(wm, flax[i].x, flax[i].y);
+			if (ready_button_visible(wm) == 1)
+				return 1;
+			if (ok_button_visible(wm) == 1)
+				click(wm, 1000, 500);
 		}
 		open_inventory(wm);
 		if (full_pods(wm) == 1)

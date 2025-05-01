@@ -5,6 +5,13 @@
 #include "mouse_manager.h"
 #include "window_manager.h"
 
+#define FIGHT_W     1360
+#define FIGHT_H      790
+#define PO_W       388
+#define PO_H       161
+#define HALF_PO_W (PO_W / 2)   /* 194 */
+#define HALF_PO_H (PO_H / 2)   /* 80  */
+
 Rgb orange_button = {.r = 255, .g = 102, .b = 0};
 Rgb ok_orange_button = {.r = 255, .g = 97, .b = 0};
 Rgb grey = {.r = 213, .g = 207, .b = 170};
@@ -48,12 +55,16 @@ Rgb oat_color_pattern[3] = {
 	{.r = 174, .g = 120, .b = 0},
 };
 
-Rgb hop_color_pattern[5] = {
-	{.r = 21, .g = 82, .b = 80},
-	{.r = 17, .g = 86, .b = 91},
-	{.r = 14, .g = 80, .b = 85},
-	{.r = 14, .g = 78, .b = 82},
-	{.r = 30, .g = 88, .b = 94},
+Rgb hop_color_pattern[3] = {
+	{.r = 0, .g = 90, .b = 71},
+	{.r = 3, .g = 90, .b = 71},
+	{.r = 20, .g = 95, .b = 78},
+};
+
+Rgb flax_color_pattern[3] = {
+	{.r = 222, .g = 215, .b = 131},
+	{.r = 227, .g = 219, .b = 156},
+	{.r = 227, .g = 220, .b = 161},
 };
 
 Rgb scarecrow_hat_dark_brown = {.r = 125, .g = 81, .b = 33};
@@ -137,6 +148,190 @@ Rgb red_color_pattern[36] = {
  {.r = 255, .b = 0, .g = 0},
  {.r = 255, .b = 0, .g = 0},
  {.r = 255, .b = 0, .g = 0},
+};
+
+Rgb light_grey_pattern[89] = {
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+	{.r = 131, .g = 135, .b = 141},
+};
+
+Rgb dark_grey_pattern[89] = {
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
+	{.r = 121, .g = 125, .b = 131},
 };
 
 Rectangle create_rectangle(int x, int y, unsigned int width, unsigned int height) {
@@ -253,8 +448,6 @@ int	check_orange_context_menu_color(XImage *zone_to_check, Rgb orange_button, in
 			else
 			{
 				orange_pixel_counter++;
-				printf("(%d, %d): %d, %d, %d %ld\n",
-						(j), (i), rgb.r, rgb.g, rgb.b, pixel);
 			}
 		}
 	}
@@ -302,17 +495,21 @@ int	ready_button_visible(WinManager *wm)
 
 int	ok_button_visible(WinManager *wm)
 {
-	Rectangle ok_button_zone = create_rectangle(900, 477, 200, 50);
+	Rectangle ok_button_zone = create_rectangle(923, 497, 151, 18);
 	XImage *ok_button_image = get_zone_to_check(wm, ok_button_zone);
-	if (check_orange_context_menu_color(ok_button_image, ok_orange_button, 20) > 30)
+	if (check_orange_context_menu_color(ok_button_image, ok_orange_button, 5) > 30)
 	{
 		printf("OK BUTTON found\n");
 		return 1;
 	}
-	else if (check_orange_context_menu_color(ok_button_image, orange_button, 15) > 30)
+	Rectangle close_button_zone = create_rectangle(1100, 750, 170, 32);
+	XImage *close_button_image = get_zone_to_check(wm, close_button_zone);
+	if (check_orange_context_menu_color(close_button_image, ok_orange_button, 5) > 30)
+	{
+		printf("CLOSE BUTTON found\n");
+		click(wm, 1178, 768);
 		return 1;
-	else if (check_orange_context_menu_color(ok_button_image, grey, 15) > 30)
-		return 1;
+	}
 	printf("COULD NOT SEE OK BUTTON keep fauching!\n");
 	return 0;
 }
@@ -345,10 +542,6 @@ void	build_color_matrix(WinManager *wm, Rgb color_matrix[1080][1920])
 {
 	Rectangle screen_zone = create_rectangle(0, 0, 1920, 1080);
 	XImage *screen_image = get_zone_to_check(wm, screen_zone);
-	for (int y = 0; y < 1080; y++)
-		for (int x = 0; x < 1920; x++)
-			color_matrix[y][x] = (Rgb){0,0,0};
-
 	for (int y = 0; y < screen_image->height; y++)
 	{
 		for (int x = 0; x < screen_image->width; x++)
@@ -387,13 +580,54 @@ int	find_matching_pattern(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], 
 		{
 			if (pattern_match(color_matrix, ref_color_pattern, pattern_length, x, y, tolerance))
 			{
-				match_counter++;
 				matches[match_counter].x = x;
 				matches[match_counter].y = y;
+				match_counter++;
 			}
 		}
 	}
+	printf("Found %d matching pattern\n", match_counter);
 	return match_counter;
+}
+
+Rectangle build_po_zone(Point p)
+{
+	int left = p.x - HALF_PO_W;
+	int right = p.x + HALF_PO_W;
+	int top = p.y - HALF_PO_H;
+	int bottom = p.y + HALF_PO_H;
+
+	if (left < 0) left = 0;
+	if (top < 0) top = 0;
+	if (right >= FIGHT_W) right = FIGHT_W - 1;
+	if (bottom >= FIGHT_H) bottom = FIGHT_H - 1;
+
+	return create_rectangle(left, top, right - left +1, bottom - top + 1);
+}
+
+int find_matching_pattern_in_rect(Rgb *ref, int pattern_len, int tol,
+                                  Rgb matrix[1080][1920], Rectangle r,
+                                  Point matches[], int max_match)
+{
+	Point p = find_player(matrix, red_color_pattern, 30, 4);
+	int count = 0;
+
+	/* 1) si la fenêtre est plus petite que le pattern, aucun match possible */
+	if (r.width  < pattern_len) return 0;
+
+	for (int y = r.y; y < r.y + r.height; ++y) {
+		for (int x = r.x; x <= r.x + r.width - pattern_len; ++x) {
+
+			if (pattern_match(matrix, ref, pattern_len, x, y, tol)) {
+				if (count < max_match) {          // sécurise le buffer
+					matches[count++] = (Point){x, y};
+					printf("Tile in PLAYER PO %d %d\n",  matches[count].x, matches[count].y);
+					printf("pattern match\n");
+				}
+			}
+		}
+	}
+	return count;
 }
 
 Point	find_player(Rgb color_matrix[1080][1920], Rgb *ref_color_pattern, int pixel_pattern_length, int tolerance)
@@ -403,7 +637,7 @@ Point	find_player(Rgb color_matrix[1080][1920], Rgb *ref_color_pattern, int pixe
 	bool match = false;
 	for (int y = 0; y  < 790; y++)
 	{
-		for (int x = 0; x < 1920 - pixel_pattern_length; x++)
+		for (int x = 0; x < 1850 - pixel_pattern_length; x++)
 		{
 			match = true;
 			for (int i = 0; i < pixel_pattern_length; i++)
@@ -426,13 +660,13 @@ Point	find_player(Rgb color_matrix[1080][1920], Rgb *ref_color_pattern, int pixe
 			}
 		}
 	}
-	printf("FOUND A TOTAL OF %d PIXELS MATCHING PLAYER'S COLOR PATTERN ACROSS THE MAP\n", same_pattern_counter);
 	if (same_pattern_counter < 1)
 	{
 		printf("COULD NOT FIND ANY PLAYER'S COLOR PATTERN: RETURNING CENTER OF SCREEN COORDINATES\n");
 		Point center;
 		center.x = 1920/2;
 		center.y = 1080/2;
+		sleep(4);
 		return center;
 	}
 	printf("PLAYER POS: [%d, %d]\n", player_pos.x, player_pos.y);
@@ -446,7 +680,7 @@ Point	find_enemy(Rgb color_matrix[1080][1920], Rgb *ref_color_pattern, int pixel
 	bool match = false;
 	for (int y = 0; y  < 770; y++)
 	{
-		for (int x = 0; x < 1920 - pixel_pattern_length; x++)
+		for (int x = 0; x < 1850 - pixel_pattern_length; x++)
 		{
 			match = true;
 			for (int i = 0; i < pixel_pattern_length; i++)
@@ -469,13 +703,13 @@ Point	find_enemy(Rgb color_matrix[1080][1920], Rgb *ref_color_pattern, int pixel
 			}
 		}
 	}
-	printf("FOUND A TOTAL OF %d MATCHING ENEMY PATTERN ACROSS THE SCREEN\n", same_pattern_counter);
 	if (same_pattern_counter < 1)
 	{
 		printf("COULD NOT FIND ANY ENEMY MATCHING PATTERN MATCH : RETURN POINT IN CENTER OF SCREEN\n");
 		Point center;
 		center.x = 1920/2;
 		center.y = 1080/2;
+		sleep(4);
 		return center;
 	}
 	printf("ENEMY POS: [%d, %d]\n", enemy_pos.x, enemy_pos.y);
@@ -488,10 +722,6 @@ int	get_red_square_pos(Rgb color_matrix[1080][1920], int pixel_pattern_length, i
 	int red_square_counter = 0;
 	bool match = false;
 	Point red_square_pos;
-	printf("PLAYER IS CURRENTLY IN (%d, %d)\n", player_pos.x, player_pos.y);
-	printf("ENEMY IS CURRENTLY IN (%d, %d)\n", enemy_pos.x, enemy_pos.y);
-	printf("X DISTANCE BETWEEN PLAYER AND ENEMY : %d\n", abs(player_pos.x - enemy_pos.x));
-	printf("Y DISTANCE BETWEEN PLAYER AND ENEMY : %d\n", abs(player_pos.y - enemy_pos.y));
 	for (int i = 0; i < pixel_pattern_length; i++)
 	{
 		red_square_color_pattern[i].r = 255;
@@ -522,17 +752,14 @@ int	get_red_square_pos(Rgb color_matrix[1080][1920], int pixel_pattern_length, i
 				red_square_counter++;
 				red_square_pos.x = x + (pixel_pattern_length / 2);
 				red_square_pos.y = y;
-				printf("RED SQUARE POS: [%d, %d]\n", red_square_pos.x, red_square_pos.y);
 			}
 		}
 	}
-	printf("FOUND A TOTAL OF %d RED SQUARES ACROSS THE SCREEN\n", red_square_counter);
 	if (red_square_counter < 1)
 	{
 		printf("COULD NOT FIND ANY RED SQUARE ON MAP\n");
 		return red_square_counter;
 	}
-	printf("RED SQUARE POS: [%d, %d]\n", red_square_pos.x, red_square_pos.y);
 	return red_square_counter;
 }
 
@@ -554,9 +781,9 @@ int	get_grey_tiles(Rgb color_matrix[1080][1920], int pattern_len, int tolerance,
 		light_grey_tile_pattern[i].g = 135;
 		light_grey_tile_pattern[i].b = 141;
 
-		dark_grey_tile_pattern[i].r = 118;
-		dark_grey_tile_pattern[i].g = 122;
-		dark_grey_tile_pattern[i].b = 127;
+		dark_grey_tile_pattern[i].r = 121;
+		dark_grey_tile_pattern[i].g = 125;
+		dark_grey_tile_pattern[i].b = 131;
 	}
 	Point grey_tile_pos;
 	for (int y = 0; y  < 791; y++)
@@ -712,20 +939,15 @@ int	get_dark_grey_tiles(Rgb color_matrix[1080][1920], int pattern_len, int toler
 // it takes a list of red square,its size and the enemy position
 Point	find_closest_placement_to_enemy(Point red_square[], int size, Point enemy_pos)
 {
-	Point placement;
-	int distances[size]; 
-	int smallest_distance = 0;
-	printf("ENEMY POS : (%d, %d)\n", enemy_pos.x, enemy_pos.y);
+	Point placement = red_square[0];
+	int smallest_distance = 69696969;
 	for (int i = 0; i < size; i++)
 	{
-		distances[i] = abs(red_square[i].x - enemy_pos.x);
-		distances[i] += abs(red_square[i].y - enemy_pos.y);
-		if (distances[i] < distances[0])
+		int distance = abs(red_square[i].x - enemy_pos.x) + abs(red_square[i].y - enemy_pos.y);
+		if (distance < smallest_distance)
 			{
-				distances[0] = distances[i];
-				smallest_distance = distances[0];
-				placement.x = red_square[i].x;
-				placement.y = red_square[i].y;
+				smallest_distance = distance;
+				placement = red_square[i];
 			}
 	}
 	printf("SMALLEST DISTANCE BETWEEN PLAYER AND ENEMY LOCATED IN : (%d, %d)\n", placement.x, placement.y);

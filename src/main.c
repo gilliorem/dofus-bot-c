@@ -12,22 +12,21 @@
 int	main(void)
 {
 	WinManager *wm = init_bot();
-	Rgb color_matrix[1080][1920];
+	static Rgb color_matrix[1080][1920];
 	build_color_matrix(wm, color_matrix);
-	Point player = find_player(color_matrix, red_color_pattern, 34, 5);
-	Point enemy = find_enemy(color_matrix, blue_color_pattern, 34, 5);
-	Point grey_tile[300];
-	int light_tiles = get_light_grey_tiles(color_matrix, 92, 5, grey_tile);
-	int dark_tiles = get_dark_grey_tiles(color_matrix, 92, 5, grey_tile);
-	int grey_tiles = light_tiles + dark_tiles;
+	Point grey_tile[1900];
+
 	while (1)
 	{
-		int in_range_tiles =  move_in_range(wm, color_matrix, grey_tile, grey_tiles);
-		sleep(4);
-		XSync(wm->display, False);
+		if (reap_hop(wm, color_matrix))
+		{
+			placement(wm, color_matrix);
+			find_player_range_tiles(wm, color_matrix);
+			if (end_of_fight(wm)==1)
+				break;
+		}
 
 	}
 	return (0);
 }
-
 
