@@ -4,6 +4,7 @@
 #include <X11/Xutil.h>
 #include "types.h"
 
+WinManager	*get_wm(void);
 WinManager	*setXConnection(void);
 WinManager	*init_bot(void);
 void	get_window_name(WinManager *wm);

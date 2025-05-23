@@ -15,7 +15,7 @@
 Rgb orange_button = {.r = 255, .g = 102, .b = 0};
 Rgb ok_orange_button = {.r = 255, .g = 97, .b = 0};
 Rgb grey = {.r = 213, .g = 207, .b = 170};
-Rgb log_in_button = {.r = 242, .g = 146, .b = 0};
+Rgb log_in_button = {.r = 255, .g = 255, .b = 255};
 Rgb wheat = {.r = 56, .g = 62, .b = 15};
 
 Rgb mandrage_color_pattern[3] = {
@@ -407,7 +407,7 @@ Rgb*	get_color_in_frame(WinManager *wm, XImage *zone_to_check)
 
 int	check_log_in(XImage *zone_to_check)
 {
-	int orange_counter = 0;
+	int white_counter = 0;
 	int tolerance = 10;
 	for (int i = 0; i < zone_to_check->height ; i++)
 	{
@@ -418,10 +418,10 @@ int	check_log_in(XImage *zone_to_check)
 			if (abs(rgb.r - log_in_button.r) < tolerance
 			&& abs(rgb.g - log_in_button.g) < tolerance
 			&& abs(rgb.b - log_in_button.b) < tolerance)
-				orange_counter++;
+				white_counter++;
 		}
 	}
-	if (orange_counter > 30)
+	if (white_counter > 30)
 	{
 		printf("LOG IN BUTTON IN ZONE\n");
 		return 1;

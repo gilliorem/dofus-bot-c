@@ -9,7 +9,7 @@ enum Weapon {
 	WEAPON_SCYTHE,
 };
 
-enum Weapon	check_weapon(WinManager *wm);
+enum	Weapon	check_weapon(WinManager *wm);
 void	equip_weapon(WinManager *wm);
 int	check_tactical_mode(WinManager *wm);
 void	tactical_mode(WinManager *wm);

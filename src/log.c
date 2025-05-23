@@ -18,7 +18,7 @@ int	start(WinManager *wm)
 
 int	log_in(WinManager *wm)
 {
-	Rectangle log_in_zone = create_rectangle(692, 490, 25, 20);
+	Rectangle log_in_zone = create_rectangle(570, 490 , 80, 25);
 	XImage *log_in_image = get_zone_to_check(wm, log_in_zone);
 	if (ok_button_visible(wm))	
 	{
@@ -28,7 +28,7 @@ int	log_in(WinManager *wm)
 	}
 	else if (check_log_in(log_in_image) == 1)
 	{
-		click(wm, 544, 53);
+		click(wm, 600,500);
 		start(wm);
 		return 1;
 	}
@@ -37,5 +37,3 @@ int	log_in(WinManager *wm)
 	else
 		return 0;
 }
-
-
