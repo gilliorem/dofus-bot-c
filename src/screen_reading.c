@@ -18,6 +18,19 @@ Rgb grey = {.r = 213, .g = 207, .b = 170};
 Rgb log_in_button = {.r = 255, .g = 255, .b = 255};
 Rgb wheat = {.r = 56, .g = 62, .b = 15};
 
+static Rgb screen_matrix[1080][1920];
+
+void update_screen_matrix(WinManager *wm)
+{
+	build_color_matrix(wm, screen_matrix);
+}
+
+Rgb (*get_screen_matrix(void))[1920]
+{
+	return screen_matrix;
+}
+
+
 Rgb mandrage_color_pattern[3] = {
 	{.r = 138, .g = 0, .b = 7},
 	{.r = 138, .g = 0, .b = 7},

@@ -29,6 +29,9 @@ extern Rgb dark_grey;
 extern Rgb light_grey_pattern[89]; 
 extern Rgb dark_grey_pattern[89];
 
+void	update_screen_matrix(WinManager *wm);
+Rgb	(*get_screen_matrix(void))[1920];
+
 void get_grey_tile_pattern(Rgb grey_tile_color, Rgb grey_pattern[89]);
 Rgb* red_circle_pattern(int len);
 Rectangle	create_rectangle(int x, int y, unsigned int width, unsigned int height);

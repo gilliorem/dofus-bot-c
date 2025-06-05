@@ -16,6 +16,19 @@ int	start(WinManager *wm)
 	return 0;
 }
 
+int	character_screen(WinManager *wm)
+{
+	click(wm, 600, 500);
+	int i = 0;
+	while (i < 2)
+	{
+		double_click(wm, 544, 530);
+		sleep(3);
+		i++;
+	}
+	return 1;
+}
+
 int	log_in(WinManager *wm)
 {
 	Rectangle log_in_zone = create_rectangle(570, 490 , 80, 25);
@@ -37,3 +50,5 @@ int	log_in(WinManager *wm)
 	else
 		return 0;
 }
+
+

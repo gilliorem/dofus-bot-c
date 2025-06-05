@@ -9,10 +9,9 @@
 #include "types.h"
 #include "bot.h"
 #include "gui.h"
+#include "movement.h"
 
 WinManager *wm = NULL;
-// why init pointer wm to NULL ?
-// ooow so we can use this variable and actually set it to smthg
 GtkApplication *app = NULL;
 WinManager* get_wm()
 {
@@ -24,28 +23,22 @@ GtkApplication *get_gtk_app()
 	return (app);
 }
 
-int	main(void)
+// wrapper appelé quand GTK est activé
+static void on_activate(GtkApplication *app, gpointer user_data)
 {
-	wm = init_bot();
-	//app = get_gtk_app();
-
-	//log_in(wm);
-	launch_gui(app, wm);
-/*
-	static Rgb color_matrix[1080][1920];
-	build_color_matrix(wm, color_matrix);
-	Point grey_tile[1900];
-	while (1)
-	{
-		if (reap_flax(wm, color_matrix))
-		{
-			placement(wm, color_matrix);
-			find_player_range_tiles(wm, color_matrix);
-			if (end_of_fight(wm)==1)
-				break;
-		}
-
-	}
-*/
-	return (0);
+    WinManager *wm = (WinManager *)user_data;
+    launch_gui(app, wm);
 }
+
+int main(void)
+{
+    wm = init_bot();
+
+    GtkApplication *app = gtk_application_new("dofus.gtk.ui", G_APPLICATION_FLAGS_NONE);
+    g_signal_connect(app, "activate", G_CALLBACK(on_activate), wm);
+
+    int status = g_application_run(G_APPLICATION(app), 0, NULL);
+    g_object_unref(app);
+    return status;
+}
+
