@@ -7,7 +7,7 @@
 void	equip_scythe(WinManager *wm)
 {
 	move_mouse(wm, 1285, 975);
-	sleep(.5);
+	sleep(1);
 	double_click(wm, 1285, 975);
 	sleep(2);
 	XSync(wm->display, False);

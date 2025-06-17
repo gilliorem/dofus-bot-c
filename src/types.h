@@ -31,6 +31,15 @@ typedef struct
 	unsigned char r;
 	unsigned char g;
 	unsigned char b;
+	char *color;
 }Rgb;
+
+typedef struct
+{
+	unsigned char r;
+	unsigned char g;
+	unsigned char b;
+	int tolerance;
+}Tolerance;
 
 #endif

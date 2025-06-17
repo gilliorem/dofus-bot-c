@@ -56,6 +56,13 @@ Rgb wheat_color_pattern[4] = {
 	{.r = 176, .g = 125, .b = 18}
 };
 
+Rgb wheat_color_pattern_vertical[4] = {
+	{.r = 174, .g = 105, .b = 21},
+	{.r = 174, .g = 101, .b = 20},
+	{.r = 171, .g = 98, .b = 20},
+	{.r = 166, .g = 97, .b = 19}
+};
+
 Rgb barley_color_pattern[3] = {
 	{.r = 120, .g = 130, .b = 0},
 	{.r = 116, .g = 130, .b = 1},
@@ -397,13 +404,12 @@ Rgb	convert_pixel_to_rgb(XImage *zone_to_check, unsigned long pixel)
 // need to compare a sequence of pixel_rgb in a given zone
 
 
-Rgb*	get_color_in_frame(WinManager *wm, XImage *zone_to_check)
+int	print_color_in_frame(WinManager *wm, XImage *zone_to_check)
 {
-	Rgb *rgb;
 	if (!zone_to_check)
 	{
 		printf("could not define zone\n");
-		return NULL;
+		return -1;
 	}
 	for (int i = 0; i < zone_to_check->height ; i++)
 	{
@@ -415,7 +421,7 @@ Rgb*	get_color_in_frame(WinManager *wm, XImage *zone_to_check)
 			(j), (i), rgb.r, rgb.g, rgb.b, pixel);
 		}
 	}
-	return rgb;
+	return 1;
 }
 
 int	check_log_in(XImage *zone_to_check)
@@ -540,15 +546,13 @@ int	full_pods(WinManager *wm)
 	return 0;
 }
 
-Rgb*	 get_color_sequence(WinManager *wm, Rectangle zone_r)
+void	 print_color_sequence(WinManager *wm, Rectangle zone_r)
 {
-	Rgb *color_sequence;
 	XImage *image_zone = get_zone_to_check(wm, zone_r);
-	color_sequence = get_color_in_frame(wm, image_zone);
+	print_color_in_frame(wm, image_zone);
 	sleep(4);
 	XSync(wm->display, False);
 	printf("---------------------\n");
-	return color_sequence;
 }
 
 void	build_color_matrix(WinManager *wm, Rgb color_matrix[1080][1920])
@@ -566,6 +570,16 @@ void	build_color_matrix(WinManager *wm, Rgb color_matrix[1080][1920])
 	}
 }
 
+bool	color_difference(Rgb ref, Rgb color, Rgb difference, Rgb tolerance)
+{
+	difference.r = (abs(color.r - ref.r));
+	difference.g = (abs(color.g - ref.g));
+	difference.b = (abs(color.b - ref.b));
+	if (difference.r > tolerance.r || difference.g > tolerance.g || difference.b > tolerance.b)
+		return (false);
+	return (true);
+}
+
 bool	pattern_match(Rgb color_matrix[1080][1920], Rgb *ref_color_pattern, int pattern_length, int x, int y, int tolerance)
 {
 	bool matching_pattern = true;
@@ -580,6 +594,22 @@ bool	pattern_match(Rgb color_matrix[1080][1920], Rgb *ref_color_pattern, int pat
 			matching_pattern = false;
 			break;
 		}
+	}
+	return matching_pattern;
+}
+
+bool	pattern_match_vertical(Rgb color_matrix[1920][1080], Rgb *ref_color_pattern, int pattern_len, int y, int x)
+{
+	bool matching_pattern = true;
+	Rgb diff= {0,0,0};
+	Rgb tolerance = {10, 10, 5};
+	for (int i = 0; i < pattern_len; i++)
+	{
+		Rgb color = color_matrix[x][y + i];
+		Rgb ref = ref_color_pattern[i];
+		matching_pattern = color_difference(ref, color, diff, tolerance);
+		if (!matching_pattern)
+			break;
 	}
 	return matching_pattern;
 }
@@ -603,6 +633,23 @@ int	find_matching_pattern(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], 
 	return match_counter;
 }
 
+int	find_matching_pattern_ver(Rgb *ref_color_pattern, Rgb color_matrix[1920][1080], int pattern_len, int tolerance, Point matches[])
+{
+	int match_count = 0;
+	for (int x = 0; x < 1920; x++)
+	{
+		for (int y = 0; y < 1080 - pattern_len; y++)
+		{
+			if (pattern_match_vertical(color_matrix, ref_color_pattern, pattern_len, y, x))
+			{
+				matches[match_count].y = y;
+				matches[match_count].x = x;
+				match_count++;
+			}
+		}
+	}
+	printf(">>find_mpatv")
+}
 Rectangle build_po_zone(Point p)
 {
 	int left = p.x - HALF_PO_W;

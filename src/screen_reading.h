@@ -38,7 +38,7 @@ Rectangle	create_rectangle(int x, int y, unsigned int width, unsigned int height
 XImage	*get_zone_to_check(WinManager *wm, Rectangle rectangle);
 int	get_bit_shift(unsigned long color_mask);
 Rgb	convert_pixel_to_rgb(XImage *zone_to_check, unsigned long pixel);
-Rgb*	get_color_in_frame(WinManager *wm, XImage *zone_to_check);
+int	print_color_in_frame(WinManager *wm, XImage *zone_to_check);
 int	check_log_in(XImage *zone_to_check);
 int	check_orange_color(XImage *zone_to_check);
 Rgb*	get_color_sequence(WinManager *wm, Rectangle r_zone);
