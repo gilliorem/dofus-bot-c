@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "farmer.h"
 #include "combat.h"
+#include <unistd.h>
 
 void	equip_scythe(WinManager *wm)
 {
@@ -54,15 +55,16 @@ void	reap_f(WinManager *wm, int x, int y)
 	sleep(8);
 }
 
-int	reap_wheat(WinManager *wm, Rgb color_matrix[1080][1920])
+int	reap_wheat(WinManager *wm, Rgb color_matrix_v[1920][1080])
 {
-	if (check_weapon(wm) != WEAPON_SCYTHE)
+	Point wheat_position[50];
+	int wheats = find_matching_pattern_v(wheat_color_pattern_vertical,color_matrix_v, 6, wheat_position);
+	printf("scanning the map for wheat...\n");
+	for (int i = 0; i < wheats; i++)
 	{
-		printf("Scythe is not equip\n");
-		equip_scythe(wm);
+		move_mouse(wm, wheat_position[i].x, wheat_position[i].y);
+		usleep(100000);
 	}
-	Point wheat[216];
-	int wheats = find_matching_pattern(wheat_color_pattern, color_matrix, 4, 10, wheat);
 	if (wheats < 1)
 	{
 		printf("No wheat found, abort\n");
@@ -70,13 +72,13 @@ int	reap_wheat(WinManager *wm, Rgb color_matrix[1080][1920])
 	}
 	if (ready_button_visible(wm) == 1)
 		return 1;
-	for (int i = 1; i < wheats; i++)
+	for (int i = 0; i < wheats; i++)
 	{
-		printf("Found wheat in (%d %d)\n", wheat[i].x, wheat[i].y);
-		reap(wm, wheat[i].x, wheat[i].y);
+		printf("Found wheat in (%d %d)\n", wheat_position[i].x, wheat_position[i].y);
+		reap(wm, wheat_position[i].x, wheat_position[i].y);
 		if (ready_button_visible(wm) == 1)
 		{
-			printf("Ready button found, Fight has started\n");
+			printf("Ready button found.\n");
 			return 1;
 		}
 	}

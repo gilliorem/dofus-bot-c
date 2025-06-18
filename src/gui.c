@@ -11,7 +11,7 @@ static void on_login_button_clicked(GtkWidget *widget, gpointer data)
 void reap_wheat_cb(GtkWidget *widget, gpointer data)
 {
     WinManager *wm = get_wm(); // tu te débrouilles avec un singleton ou une globale
-    Rgb (*matrix)[1920] = get_screen_matrix(); // à adapter selon ton archi
+    Rgb (*matrix)[1080] = get_screen_matrix_v(); // à adapter selon ton archi
 
     if (!wm || !matrix)
     {

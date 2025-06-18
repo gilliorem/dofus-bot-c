@@ -36,6 +36,7 @@ void	move_mouse(WinManager *wm, int x, int y)
 	None, 
 	wm->root, 
 	0, 0, 0, 0, x, y);
+	XSync(wm->display, False);
 }
 
 void fake_click(WinManager *wm, int button, Bool down)

@@ -30,15 +30,22 @@ static void on_activate(GtkApplication *app, gpointer user_data)
     launch_gui(app, wm);
 }
 
-int main(void)
+int	init_gtk(WinManager *wm)
 {
-    wm = init_bot();
-
     GtkApplication *app = gtk_application_new("dofus.gtk.ui", G_APPLICATION_FLAGS_NONE);
     g_signal_connect(app, "activate", G_CALLBACK(on_activate), wm);
-
     int status = g_application_run(G_APPLICATION(app), 0, NULL);
     g_object_unref(app);
     return status;
+}
+
+int main()
+{
+    wm = init_bot();
+    static Rgb color_matrix_v[1920][1080];
+    build_color_matrix_vertical(wm, color_matrix_v);
+    //reap_wheat(wm, color_matrix_v);
+    ready_button_visible(wm);
+    return 0;
 }
 
