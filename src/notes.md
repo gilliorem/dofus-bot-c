@@ -64,9 +64,24 @@ R: 166-174
 G: 97-105
 B: 19-21
 
-1.1. Recognize pattern on y axis.
-2. Spot 100% of the wheat in map.
-3. Check pixel-color randomly
+1.1. Recognize pattern on y axis. *ok*
+2. Spot 100% of the wheat in map. *80%+* -> good enough  for now.
 
+18.06
+1. Update following color pattern:
+- hop
+- flax
 
+### COMBAT
+- Find total number of tiles
+	>Redefine tile color-pattern
+- Find player
+	>Redefine player color-pattern
+- Find enemy
+	>Redefine enemy color-pattern
 
+- Calculate distance
+	>Distance in tile
+- Find path
+	>Draw path.
+	>Move

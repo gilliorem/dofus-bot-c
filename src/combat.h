@@ -10,6 +10,7 @@ enum Weapon {
 };
 
 enum	Weapon	check_weapon(WinManager *wm);
+int	check_hammer_zone(WinManager *wm);
 void	equip_weapon(WinManager *wm);
 int	check_tactical_mode(WinManager *wm);
 void	tactical_mode(WinManager *wm);

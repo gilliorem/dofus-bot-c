@@ -18,7 +18,7 @@ void reap_wheat_cb(GtkWidget *widget, gpointer data)
         g_print("Wheat callback failed: missing wm or matrix\n");
         return;
     }
-    reap_wheat(wm, matrix);
+    reap_wheat(wm);
 }
 
 void reap_barley_cb(GtkWidget *widget, gpointer data)
@@ -57,7 +57,7 @@ void reap_hop_cb(GtkWidget *widget, gpointer data)
         g_print("Wheat callback failed: missing wm or matrix\n");
         return;
     }
-    reap_hop(wm, matrix);
+    reap_hop(wm);
 }
 
 void reap_flax_cb(GtkWidget *widget, gpointer data)
@@ -70,7 +70,7 @@ void reap_flax_cb(GtkWidget *widget, gpointer data)
         g_print("Wheat callback failed: missing wm or matrix\n");
         return;
     }
-    reap_flax(wm, matrix);
+    reap_flax(wm);
 }
 
 void callback_field(GtkWidget *widget, gpointer data)

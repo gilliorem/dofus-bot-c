@@ -16,10 +16,10 @@ void	equip_scythe(WinManager *wm)
 
 int open_inventory(WinManager *wm)
 {
-	move_mouse(wm, 1314, 884);
-	sleep(1);
-	fake_click(wm, 1, true);
-	sleep(1);
+	Rectangle inventory_zone = create_rectangle(1160, 855, 178, 68);
+	XImage *inventory_image = get_zone_to_check(wm, inventory_zone);
+	Rgb inventory_color = {51, 51, 51};
+	
 	return 0;
 }
 
@@ -55,16 +55,20 @@ void	reap_f(WinManager *wm, int x, int y)
 	sleep(8);
 }
 
-int	reap_wheat(WinManager *wm, Rgb color_matrix_v[1920][1080])
+int	reap_wheat(WinManager *wm)
 {
+	static Rgb color_matrix_v[1920][1080];
+	build_color_matrix_vertical(wm, color_matrix_v);
 	Point wheat_position[50];
-	int wheats = find_matching_pattern_v(wheat_color_pattern_vertical,color_matrix_v, 6, wheat_position);
+	int wheats = find_matching_pattern_v(wheat_color_pattern_vertical,color_matrix_v, 5, wheat_position);
 	printf("scanning the map for wheat...\n");
 	for (int i = 0; i < wheats; i++)
 	{
 		move_mouse(wm, wheat_position[i].x, wheat_position[i].y);
 		usleep(100000);
 	}
+	printf("reap_wheat()>>>return;");
+	return 0;
 	if (wheats < 1)
 	{
 		printf("No wheat found, abort\n");
@@ -147,64 +151,64 @@ int	reap_oat(WinManager *wm, Rgb color_matrix[1080][1920])
 	return 0;
 }
 
-int	reap_hop(WinManager *wm, Rgb color_matrix[1080][1920])
+int	reap_hop(WinManager *wm)
 {
-	for (int i = 0; i < 10; i++)
+	static Rgb color_matrix_v[1920][1080];
+	build_color_matrix_vertical(wm, color_matrix_v);
+	Point hop_list[50];
+	int hops = find_matching_pattern_v(hop_color_pattern_v, color_matrix_v, 4, hop_list);
+	if (hops < 1)
 	{
-		Point hop[216];
+		printf("Hop not find\n");
+		return 0;
+	}
+	printf("Scannig map for hop...\n");
+	for (int i = 0; i < hops; i++)
+	{
+		move_mouse(wm, hop_list[i].x, hop_list[i].y);
+		usleep(100000);
+	}
+	printf("Found %d hops on current map.\n", hops);
+	//printf("reap_hop()>>RETURN<<");
+	//return 0;
+
+	for (int i = 1; i < hops; i++)
+	{
+		printf("Found hop in (%d %d)\n", hop_list[i].x, hop_list[i].y);
+		reap(wm, hop_list[i].x, hop_list[i].y);
 		if (ready_button_visible(wm) == 1)
 			return 1;
-		if (check_weapon(wm) != WEAPON_SCYTHE)
-			equip_scythe(wm);
-		int hops = find_matching_pattern(hop_color_pattern, color_matrix, 3, 2, hop);
-		if (hops < 1)
-		{
-			printf("Hop not find\n");
-			return 0;
-		}
-		for (int i = 1; i < hops; i++)
-		{
-			printf("Found hop in (%d %d)\n", hop[i].x, hop[i].y);
-			reap(wm, hop[i].x, hop[i].y);
-			if (ready_button_visible(wm) == 1)
-				return 1;
-			else if (ok_button_visible(wm) == 1)
-				click(wm, 1230, 480);
-		}
-		open_inventory(wm);
-		if (full_pods(wm) == 1)
-		{
-			close_inventory(wm);
-			return 2;
-		}
-		close_inventory(wm);
+		else if (ok_button_visible(wm) == 1)
+			click(wm, 1230, 480);
 	}
 	return 0;
 }
 
-int	reap_flax(WinManager *wm, Rgb color_matrix[1080][1920])
+int	reap_flax(WinManager *wm) 
 {
-	if (ready_button_visible(wm) == 1)
+	static Rgb color_matrix_v[1920][1080];
+	build_color_matrix_vertical(wm, color_matrix_v);
+	Point flax[50];
+	int flaxs = find_matching_pattern_v(flax_color_pattern_v, color_matrix_v, 4, flax);
+	printf("Scanning for flax...\n");
+	for (int i = 0; i < flaxs; i++)
 	{
-		printf("found ready boutton\n");
-		if (check_weapon(wm) != WEAPON_HAMMER)
-			equip_weapon(wm);
-		return 1;
+		int x = flax[i].x;
+		int y = flax[i].y;
+		move_mouse(wm, x, y);
+		usleep(100000);
 	}
-	Point player_pos = find_player(color_matrix, red_color_pattern, 34, 5);
-	if (player_pos.x != 1920/2)
-		return 1;
-	ok_button_visible(wm);
-	Point flax[216];
-	int flaxs = find_matching_pattern(flax_color_pattern, color_matrix, 3, 8, flax);
 	if (flaxs < 1)
 	{
-		printf("FARMER.C no flax found, return 0\n");
+		printf("reap_flax(): DID NOT FIND FLAX. RETURNING 0.\n");
 		return 0;
 	}
+	printf("Found %d flaxs on current map.\n", flaxs);
+	//printf("reap_flax(): RETURN\n");
+	//return 0;
 	for (int i = 0; i < 10; i++)
 	{
-		build_color_matrix(wm, color_matrix);
+		build_color_matrix_vertical(wm, color_matrix_v);
 		if (ready_button_visible(wm) == 1)
 		{
 			printf("found ready boutton\n");
@@ -216,7 +220,7 @@ int	reap_flax(WinManager *wm, Rgb color_matrix[1080][1920])
 			click(wm, 1000, 500);
 		if (check_weapon(wm) != WEAPON_SCYTHE)
 			equip_scythe(wm);
-		flaxs = find_matching_pattern(flax_color_pattern, color_matrix, 3, 8, flax);
+		flaxs = find_matching_pattern_v(flax_color_pattern_v, color_matrix_v, 6, flax);
 		printf("Found %d flax\n", flaxs);
 		if (i > 2 && flaxs < 3)
 		{
@@ -238,13 +242,6 @@ int	reap_flax(WinManager *wm, Rgb color_matrix[1080][1920])
 			if (ok_button_visible(wm) == 1)
 				click(wm, 1000, 500);
 		}
-		open_inventory(wm);
-		if (full_pods(wm) == 1)
-		{
-			close_inventory(wm);
-			return 2;
-		}
-		close_inventory(wm);
 	}
 	return 0;
 }

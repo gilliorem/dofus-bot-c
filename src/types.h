@@ -42,4 +42,11 @@ typedef struct
 	int tolerance;
 }Tolerance;
 
+typedef struct
+{
+	Rgb color;
+	int height;
+	int width;
+}Rgb_pattern;
+
 #endif

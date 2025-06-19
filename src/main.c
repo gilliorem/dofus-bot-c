@@ -41,11 +41,13 @@ int	init_gtk(WinManager *wm)
 
 int main()
 {
+
     wm = init_bot();
-    static Rgb color_matrix_v[1920][1080];
-    build_color_matrix_vertical(wm, color_matrix_v);
-    //reap_wheat(wm, color_matrix_v);
-    ready_button_visible(wm);
+    //init_gtk(wm);
+    //check_weapon(wm);
+	check_hammer_zone(wm);
+    
+
     return 0;
 }
 

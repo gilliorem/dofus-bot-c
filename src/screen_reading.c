@@ -41,6 +41,15 @@ Rgb (*get_screen_matrix_v(void))[1080]
 	return screen_matrix_v;
 }
 
+Rgb white_pattern[6] = {
+	{.r = 255, .g = 255, .b = 255},
+	{.r = 255, .g = 255, .b = 255},
+	{.r = 255, .g = 255, .b = 255},
+	{.r = 255, .g = 255, .b = 255},
+	{.r = 255, .g = 255, .b = 255},
+	{.r = 255, .g = 255, .b = 255}
+};
+
 Rgb mandrage_color_pattern[3] = {
 	{.r = 138, .g = 0, .b = 7},
 	{.r = 138, .g = 0, .b = 7},
@@ -95,10 +104,28 @@ Rgb hop_color_pattern[3] = {
 	{.r = 20, .g = 95, .b = 78},
 };
 
+Rgb hop_color_pattern_v[6] = {
+	{.r = 0, .g = 93, .b = 74},
+	{.r = 0, .g = 91, .b = 72},
+	{.r = 0, .g = 90, .b = 71},
+	{.r = 0, .g = 91, .b = 70},
+	{.r = 0, .g = 90, .b = 70},
+	{.r = 0, .g = 86, .b = 70}
+};
+
 Rgb flax_color_pattern[3] = {
 	{.r = 222, .g = 215, .b = 131},
 	{.r = 227, .g = 219, .b = 156},
 	{.r = 227, .g = 220, .b = 161},
+};
+
+Rgb flax_color_pattern_v[6] = {
+	{.r = 159, .g = 133, .b = 83},
+	{.r = 157, .g = 130, .b = 83},
+	{.r = 157, .g = 130, .b = 79},
+	{.r = 157, .g = 131, .b = 78},
+	{.r = 158, .g = 132, .b = 77},
+	{.r = 158, .g = 131, .b = 75}
 };
 
 Rgb scarecrow_hat_dark_brown = {.r = 125, .g = 81, .b = 33};
@@ -391,6 +418,19 @@ XImage	*get_zone_to_check(WinManager *wm, Rectangle rectangle)
 	return zone_to_check;
 }
 
+Rgb_pattern	create_rgb_pattern(Rgb color, int height, int width)
+{
+	Rgb_pattern color_pattern;
+	for (int j = 0; j < height; j++)
+	{
+		for (int i = 0; i < width; i++)
+		{
+			color_pattern.color = color;
+		}
+	}
+	return color_pattern;
+}
+
 int	get_bit_shift(unsigned long color_mask)
 {
 	int shift = 0;
@@ -517,7 +557,7 @@ int	check_in_game(WinManager *wm)
  * check the one in zone
  * to check I'm going to go through the x axis 10 times
  * If i get a line of same-color-pixel, I will declare it's a ready button
- *
+ * /!\ Watch out for hover: if during the checking the mouse is hovering th ready button: color changes!
  * I can also determine the length the portable way: going x++ until color change: 1offset
  * going x-- until color change: 2offset
  * same for the ys.
@@ -538,26 +578,38 @@ int	ready_button_visible(WinManager *wm)
 	printf("Pixel:%ld\n",pixel);
 	Rgb color = convert_pixel_to_rgb(ready_img, pixel);
 	printf("REF COLOR: R:%d G:%d B:%d\n", color.r, color.g, color.b);
-	int flag = 0;
 	printf("scaning zone...\n");
-	for (int i = 0; i < 30; i++)
+	for (int j = 0; j < 30; j++)
 	{
-		move_mouse(wm, x+i, y);
-		usleep(100000);
+		for (int i = 0; i < 30; i++)
+		{
+			move_mouse(wm, x+i, y+j);
+			usleep(10000);
+		}
 	}
-	for (int i = 1; i < 30; i++)
+	for (int j = 1; j < 30; j++)
 	{
-		unsigned long tmp_pixel = XGetPixel(ready_img, x + i, y);
-		Rgb pixel_color = convert_pixel_to_rgb(ready_img, tmp_pixel);
-		printf("COLOR IN (%d %d)R:%d G:%d B:%d\n", x + i, y, pixel_color.r, pixel_color.g, pixel_color.b);
-		if (pixel_color.r == color.r)
-			flag++;
+		int flag = 0;	
+		for (int i = 1; i < 30; i++)
+		{
+			unsigned long tmp_pixel = XGetPixel(ready_img, x + i, y + j);
+			Rgb pixel_color = convert_pixel_to_rgb(ready_img, tmp_pixel);
+			printf("COLOR IN (%d %d)R:%d G:%d B:%d\n", x + i, y + j, pixel_color.r, pixel_color.g, pixel_color.b);
+			if (pixel_color.r == color.r && pixel_color.g == color.g && pixel_color.b == color.b
+			&& pixel_color.r > 250 && pixel_color.b > 125 && pixel_color.b < 200 && pixel_color.g < 40)
+			{
+				printf("flag trigger\n");
+				flag++;
+			}
+		}
+		printf("Flag trigger >%d< times\n", flag);
+		if (flag > 25)
+		{
+			printf("Same COLOR PATTERN FOUND 25 times. Return\n");
+			return 1;
+		}
 	}
-	if (flag < 10)
-		printf("COULD NOT SEE READY BUTTON in ZONE\n");
-	else if (flag >= 10)
-		printf("Ready Button is visible:%d same-color-pixels\n",flag);
-	return flag;
+	return 0;
 }
 
 int	ok_button_visible(WinManager *wm)
@@ -602,6 +654,46 @@ void	 print_color_sequence(WinManager *wm, Rectangle zone_r)
 	XSync(wm->display, False);
 }
 
+
+int	check_color_pattern(WinManager *wm, Rgb **ref, XImage *img, int len)
+{
+	Rgb color_pattern[img->height][img->width];
+
+	int y = img->height;
+	int x = img->width;
+	for (int j = 0; j < y; j++)
+	{
+		printf("Scanning new line...n");
+		for (int i = 0; i < x; i++)
+		{
+			printf("R%d G%d B%d\n",color_pattern[y + j][i + x].r, color_pattern[y + j][i + x].g, color_pattern[y + j][i + x].b);
+			move_mouse(wm, x + i, y + j);
+		}
+	}
+	int flag = 0;
+	for (int j = 0; j < y; j++)
+	{
+		flag = 0;
+		int i = 0;
+		for (i = 0; i < len; i++)
+		{
+			unsigned long pixel = XGetPixel(img, x + i, y + j);
+			Rgb color = convert_pixel_to_rgb(img, pixel);
+			color_pattern[y+j][x+i] = color;
+			if(color_pattern[y + j][x + i].r == ref[j][i].r
+			&& color_pattern[y + j][x + i].g == ref[j][i].g
+			&& color_pattern[y + j][x + i].b == ref[j][i].b)
+				flag++;
+		}
+		if (flag == len)
+		{
+			printf("PATTERN MATCH RETURN 1.\n");
+			return 1;
+		}
+	}
+	return 0;
+}
+
 void	build_color_matrix(WinManager *wm, Rgb color_matrix[1080][1920])
 {
 	Rectangle screen_zone = create_rectangle(0, 0, 1920, 1080);
@@ -616,6 +708,29 @@ void	build_color_matrix(WinManager *wm, Rgb color_matrix[1080][1920])
 		}
 	}
 	printf(">>Screen color matrix built.\n");
+}
+
+void	build_color_matrix_small(WinManager *wm, Rgb small_matrix[100][100], int x, int y)
+{
+	int width = 100;
+	int height = 100;
+	Rectangle screen_zone = create_rectangle(x, y, width, height);
+	XImage *screen_image = get_zone_to_check(wm, screen_zone);
+	printf("Small IMG created: IMG WIDTH:%d\nIMG HEIGHT:%d\n",screen_image->width, screen_image->height);
+	for (int j = 0; j < height; j++)
+	{
+		printf("Scaning the zone...\n");
+		for (int i = 0; i < width; i++)
+		{
+			unsigned long pixel = XGetPixel(screen_image, i, j);
+			Rgb pixel_color = convert_pixel_to_rgb(screen_image, pixel);
+			small_matrix[y][x] = pixel_color;
+			//printf("R:%d G:%d B:%d\n",small_matrix[y][x].r,
+			//small_matrix[y][x].g, small_matrix[y][x].b);
+		}
+	}
+	printf(">>Small Screen color matrix built:\n\
+width:%d\nheight:%d\nx:%d\ny:%d\n",screen_image->width, screen_image->height, x, y);
 }
 
 void	build_color_matrix_vertical(WinManager *wm, Rgb color_matrix_v[1920][1080])
@@ -664,8 +779,8 @@ int	find_matching_pattern_v(Rgb *ref_color_pattern, Rgb color_matrix_v[1920][108
 			{
 				int mx = matches[match_count].y = y;
 				int my = matches[match_count].x = x;
-				x+= 2;
-				y+= 10;
+				y+= 20;
+				x+= 10;
 				printf("Matching pattern in (%d, %d)\n", mx, my);
 				match_count++;
 			}
@@ -723,6 +838,47 @@ int	find_matching_pattern(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], 
 	return match_counter;
 }
 
+bool	small_pattern_match(Rgb small_matrix[100][100], Rgb *ref_pattern, int pattern_len, int x, int y)
+{
+	bool match = true;
+	int tolerance = 5;
+	for (int i = 0; i < pattern_len; i++)
+	{
+		Rgb color = small_matrix[x + i][y];
+		Rgb ref = ref_pattern[i];
+		if (abs(color.r - ref.r) > tolerance ||
+		abs(color.g - ref.g) > tolerance ||
+		abs(color.b - ref.b) > tolerance)
+		{
+			match= false;
+			break;
+		}
+	}
+	return match;
+}
+
+
+int	find_matching_pattern_small(Rgb *ref_color_pattern, int y, int x, Rgb small_matrix[100][100], int pattern_length, int tolerance, Point matches[])
+{
+	int	match_counter = 0;
+	int height = 100;
+	int width = 100;
+	for (int j = 0; j < height; j++)
+	{
+		printf("Scaning line...\n");
+		for (int i = 0; i < width - pattern_length; i++)
+		{
+			if (small_pattern_match(small_matrix, ref_color_pattern, pattern_length, x, y))
+			{
+				matches[match_counter].x = x + i;
+				matches[match_counter].y = y +j;
+				match_counter++;
+			}
+		}
+	}
+	printf("Found %d matching pattern\n", match_counter);
+	return match_counter;
+}
 
 Rectangle build_po_zone(Point p)
 {

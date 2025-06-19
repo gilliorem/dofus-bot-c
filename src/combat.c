@@ -8,8 +8,33 @@
 
 //ajouter un check pour voir si l'arme est deja equipee
 // weapon etant dans ce cas l'arme de cac (ici, marteau bouftou)
+
+int	check_hammer_zone(WinManager *wm)
+{
+	static Rgb hammer_matrix[100][100];
+	printf("check hammer zone() Rgb zone created\n");
+	build_color_matrix_small(wm, hammer_matrix, 1180, 943);
+	Point white_pixel_list[50];
+	int white_pixel = find_matching_pattern_small(white_pattern, 943, 1180, hammer_matrix, 3, 5, white_pixel_list);
+	printf("Scanning hammer zone...\n");
+	for (int i = 0; i < white_pixel; i++)
+	{
+		move_mouse(wm, white_pixel_list[i].x, white_pixel_list[i].y);
+		usleep(100000);
+	}
+	if (white_pixel < 1)
+	{
+		printf("WHITE LINE NOT FOUND.\nReturn 0.\n");
+		return 0;
+	}
+	return 1;
+}
+
 enum Weapon	check_weapon(WinManager *wm)
 {
+	// hammer pos: 1220 970
+	// scythe pos: 1270 970
+	// 	if the white line is 
 	Rgb ref = {.r = 255, .g = 255, .b = 255};
 	int tolerance = 5;
 	Rectangle scythe_zone = create_rectangle(1274, 968, 1, 1);
