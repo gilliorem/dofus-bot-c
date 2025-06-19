@@ -712,27 +712,74 @@ void	build_color_matrix(WinManager *wm, Rgb color_matrix[1080][1920])
 
 void	build_color_matrix_small(WinManager *wm, Rgb small_matrix[100][100], int x, int y)
 {
-	int width = 100;
-	int height = 100;
+	//temporary set from 100 to 10 for testing purpose
+	int width = 10;
+	int height = 10;
 	Rectangle screen_zone = create_rectangle(x, y, width, height);
 	XImage *screen_image = get_zone_to_check(wm, screen_zone);
-	printf("Small IMG created: IMG WIDTH:%d\nIMG HEIGHT:%d\n",screen_image->width, screen_image->height);
+	printf("screen_reading.c <l719>\nbuild_color_matrix_small()\nIMG created: IMG WIDTH:%d\nIMG HEIGHT:%d\n",screen_image->width, screen_image->height);
 	for (int j = 0; j < height; j++)
 	{
-		printf("Scaning the zone...\n");
 		for (int i = 0; i < width; i++)
 		{
 			unsigned long pixel = XGetPixel(screen_image, i, j);
 			Rgb pixel_color = convert_pixel_to_rgb(screen_image, pixel);
-			small_matrix[y][x] = pixel_color;
-			//printf("R:%d G:%d B:%d\n",small_matrix[y][x].r,
-			//small_matrix[y][x].g, small_matrix[y][x].b);
+			small_matrix[y + j][x + i] = pixel_color;
+			printf("R:%d G:%d B:%d\n",small_matrix[y+j][x+i].r,
+			small_matrix[y+j][x+i].g, small_matrix[y+j][x+i].b);
+			move_mouse(wm, x+i, y+j);
+			usleep(1000);
 		}
 	}
-	printf(">>Small Screen color matrix built:\n\
-width:%d\nheight:%d\nx:%d\ny:%d\n",screen_image->width, screen_image->height, x, y);
+	printf("screen_reading.c <l733>\nbuild_color_matrix_small()\n>>Small Screen color matrix finish build:\n");
 }
 
+bool	small_pattern_match(Rgb small_matrix[100][100], Rgb *ref_pattern, int pattern_len, int x, int y)
+{
+	int tolerance = 5;
+	bool match = true;
+	for (int i = 0; i < pattern_len; i++)
+	{
+		Rgb color = small_matrix[y][x+i];
+		Rgb ref = ref_pattern[i];
+		printf("screen_reading.c<l744>\nbool small_pattern_match()\nCOLOR - REF:\nTEMP:(R:%d G:%d B:%d) - REF:(R:%d G:%d B:%d)\n",  color.r, color.g, color.b, ref.r, ref.g, ref.b);
+		if (abs(color.r - ref.r) > tolerance ||
+		abs(color.g - ref.g) > tolerance ||
+		abs(color.b - ref.b) > tolerance)
+		{
+			printf("xxNOT MATCHxx\n");
+			match = false;
+			break;
+		}
+		printf(">>MATCH<<\n");
+	}
+	return match;
+}
+
+int	find_matching_pattern_small(Rgb *ref_color_pattern, int y, int x, Rgb small_matrix[100][100], int pattern_length, int tolerance, Point matches[])
+{
+	int	match_counter = 0;
+	//temporary set from 100 to 10 for testing purpose
+	int height = 10;
+	int width = 10;
+	for (int j = 0; j < height; j++)
+	{
+		printf("screen_reading.c<l763>\nfind_matching_pattern_small()\nScaning line comparing pattern...\n");
+		for (int i = 0; i < width - pattern_length; i++)
+		{
+			if (small_pattern_match(small_matrix, ref_color_pattern, pattern_length, x, y))
+			{
+				matches[match_counter].y = y + j;
+				matches[match_counter].x = x + i;
+				printf("y + j = %d + %d = %d\n", y, j, y + j);
+				printf("x + i = %d + %d = %d\n", x, i, x + i);
+				match_counter++;
+			}
+		}
+	}
+	printf("Found %d matching pattern\n", match_counter);
+	return match_counter;
+}
 void	build_color_matrix_vertical(WinManager *wm, Rgb color_matrix_v[1920][1080])
 {
 	Rectangle screen_zone = create_rectangle(0, 0, 1920, 1080);
@@ -838,47 +885,6 @@ int	find_matching_pattern(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], 
 	return match_counter;
 }
 
-bool	small_pattern_match(Rgb small_matrix[100][100], Rgb *ref_pattern, int pattern_len, int x, int y)
-{
-	bool match = true;
-	int tolerance = 5;
-	for (int i = 0; i < pattern_len; i++)
-	{
-		Rgb color = small_matrix[x + i][y];
-		Rgb ref = ref_pattern[i];
-		if (abs(color.r - ref.r) > tolerance ||
-		abs(color.g - ref.g) > tolerance ||
-		abs(color.b - ref.b) > tolerance)
-		{
-			match= false;
-			break;
-		}
-	}
-	return match;
-}
-
-
-int	find_matching_pattern_small(Rgb *ref_color_pattern, int y, int x, Rgb small_matrix[100][100], int pattern_length, int tolerance, Point matches[])
-{
-	int	match_counter = 0;
-	int height = 100;
-	int width = 100;
-	for (int j = 0; j < height; j++)
-	{
-		printf("Scaning line...\n");
-		for (int i = 0; i < width - pattern_length; i++)
-		{
-			if (small_pattern_match(small_matrix, ref_color_pattern, pattern_length, x, y))
-			{
-				matches[match_counter].x = x + i;
-				matches[match_counter].y = y +j;
-				match_counter++;
-			}
-		}
-	}
-	printf("Found %d matching pattern\n", match_counter);
-	return match_counter;
-}
 
 Rectangle build_po_zone(Point p)
 {

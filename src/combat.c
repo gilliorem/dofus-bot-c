@@ -15,7 +15,7 @@ int	check_hammer_zone(WinManager *wm)
 	printf("check hammer zone() Rgb zone created\n");
 	build_color_matrix_small(wm, hammer_matrix, 1180, 943);
 	Point white_pixel_list[50];
-	int white_pixel = find_matching_pattern_small(white_pattern, 943, 1180, hammer_matrix, 3, 5, white_pixel_list);
+	int white_pixel = find_matching_pattern_small(white_pattern, 943, 1180, hammer_matrix, 6, 5, white_pixel_list);
 	printf("Scanning hammer zone...\n");
 	for (int i = 0; i < white_pixel; i++)
 	{
