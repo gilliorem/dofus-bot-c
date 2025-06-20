@@ -58,16 +58,16 @@ int	full_pods(WinManager *wm);
 bool	color_difference(Rgb ref, Rgb color, Rgb difference, Rgb tolerance);
 
 void	build_color_matrix(WinManager *wm, Rgb color_matrix[1080][1920]);
-void	build_color_matrix_small(WinManager *wm,Rgb color_matrix[100][100], int x, int y);
 bool	pattern_match(Rgb color_matrix[1080][1920], Rgb *ref_color_pattern, int pattern_length, int x, int y, int tolerance);
 int	find_matching_pattern(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pattern_length, int tolerance, Point matches[216]);
-int	find_matching_pattern_small(Rgb *ref_color_pattern, int height, int width, Rgb color_matrix[height][width], int pattern_length, int tolerance, Point matches[216]);
 
 void	build_color_matrix_vertical(WinManager *wm, Rgb color_matrix_v[1920][1080]);
 bool	pattern_match_vertical(Rgb color_matrix_v[1920][1080], Rgb *ref_color_pattern, int pattern_len, int y, int x);
 int	find_matching_pattern_v(Rgb *ref_color_pattern, Rgb color_matrix_v[1920][1080], int pattern_len, Point matches[]);
 
-bool	small_pattern_match(Rgb small_matrix[100][100], Rgb *ref_pattern, int pattern_len, int x, int y);
+void	build_color_matrix_small(WinManager *wm,Rgb color_matrix[100][100], int x, int y);
+bool	small_pattern_match(WinManager *wm, Rgb small_matrix[100][100], Rgb *ref_pattern, int pattern_len, int x, int y);
+int	find_matching_pattern_small(Rgb *ref_color_pattern, int height, int width, Rgb color_matrix[height][width], int pattern_length, int tolerance, Point matches[216]);
 
 Rectangle build_po_zone(Point p);
 int find_matching_pattern_in_rect(Rgb *ref, int pattern_len, int tol,

@@ -72,6 +72,49 @@ B: 19-21
 - hop
 - flax
 
+### COMBAT STATE
+- Initial element used to determine the state:
+Ready button.
+Problem with this detection-type:
+The button is visible only during the *placement* phase.
+In case of check failling during this phase, we would lose our chance for later checks. We can improve the checking by looking for a static-element that remain here during the 2 combat phases.
+
+**VIUSAL ELEMENTS**
+> Ready button
+> 5+ Icon above ready button
+> Orange visual time counter (+ give me the info that is my turn)
+> Red tiles and blue tiles accross the fight-map
+
+**Combat has started**
+> AP and MP (static element) and same color
+> Spells (static) different color on hover or depends on AP
+> Pass my turn button same color
+> Surrender flag (static)
+> Red and blue circle (moving) -will also give me pos info.
+
+Scenario: 
+Reap wheat
+>*2 checks*
+	>Ready button
+	>Red tiles and blue tiles
+>One or more of the elements are presents:
+	>Player is in Combat mode.
+>None of the element are present:
+	>Player is in Normal mode.
+
+>Combat mode
+	>Check hammer
+	>Equip hammer
+	>Check player pos
+	>Check enemy pos
+	>Check red tiles
+	>Find smallest distance between enemy and closest-red-tile
+	>Place on the closest-to-enemy-red-tile
+	>Check for orange counter
+		*no-orange-counter*:
+			-not in fight
+			-fight has already started (enemy's turn)
+
 ### COMBAT
 - Find total number of tiles
 	>Redefine tile color-pattern

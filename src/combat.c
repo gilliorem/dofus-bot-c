@@ -9,20 +9,21 @@
 //ajouter un check pour voir si l'arme est deja equipee
 // weapon etant dans ce cas l'arme de cac (ici, marteau bouftou)
 
+// /!\ Y ORIGINAL VALUE: 943. Unless you know what your doing, set/leave it to 943. 
 int	check_hammer_zone(WinManager *wm)
 {
 	static Rgb hammer_matrix[100][100];
 	printf("check hammer zone() Rgb zone created\n");
 	build_color_matrix_small(wm, hammer_matrix, 1180, 943);
 	Point white_pixel_list[50];
-	int white_pixel = find_matching_pattern_small(white_pattern, 943, 1180, hammer_matrix, 6, 5, white_pixel_list);
+	int white_pixel_pattern = find_matching_pattern_small(white_pattern, 1180, 943, hammer_matrix, 2, 5, white_pixel_list);
 	printf("Scanning hammer zone...\n");
-	for (int i = 0; i < white_pixel; i++)
+	for (int i = 0; i < white_pixel_pattern; i++)
 	{
 		move_mouse(wm, white_pixel_list[i].x, white_pixel_list[i].y);
 		usleep(100000);
 	}
-	if (white_pixel < 1)
+	if (white_pixel_pattern < 1)
 	{
 		printf("WHITE LINE NOT FOUND.\nReturn 0.\n");
 		return 0;
