@@ -57,6 +57,11 @@ int	ok_button_visible(WinManager *wm);
 int	full_pods(WinManager *wm);
 bool	color_difference(Rgb ref, Rgb color, Rgb difference, Rgb tolerance);
 
+bool	rgb_difference(Rgb temp, Rgb ref, Rgb tol);
+bool	rgb_match(WinManager *wm, Rgb small_matrix[100][100], Rgb ref, Rgb tol, int x, int y);
+int	count_matches(WinManager *wm, Rgb ref, Rgb small_matrix[100][100], Rgb tol, Point match[], int y, int x);
+int	check_state(WinManager *wm);
+
 void	build_color_matrix(WinManager *wm, Rgb color_matrix[1080][1920]);
 bool	pattern_match(Rgb color_matrix[1080][1920], Rgb *ref_color_pattern, int pattern_length, int x, int y, int tolerance);
 int	find_matching_pattern(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pattern_length, int tolerance, Point matches[216]);
@@ -65,7 +70,7 @@ void	build_color_matrix_vertical(WinManager *wm, Rgb color_matrix_v[1920][1080])
 bool	pattern_match_vertical(Rgb color_matrix_v[1920][1080], Rgb *ref_color_pattern, int pattern_len, int y, int x);
 int	find_matching_pattern_v(Rgb *ref_color_pattern, Rgb color_matrix_v[1920][1080], int pattern_len, Point matches[]);
 
-void	build_color_matrix_small(WinManager *wm,Rgb color_matrix[100][100], int x, int y);
+void	build_color_matrix_small(WinManager *wm, Rgb color_matrix[100][100], int x, int y);
 bool	small_pattern_match(WinManager *wm, Rgb small_matrix[100][100], Rgb *ref_pattern, int pattern_len, int x, int y);
 int	find_matching_pattern_small(Rgb *ref_color_pattern, int height, int width, Rgb color_matrix[height][width], int pattern_length, int tolerance, Point matches[216]);
 

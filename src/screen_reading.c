@@ -713,22 +713,27 @@ void	build_color_matrix(WinManager *wm, Rgb color_matrix[1080][1920])
 void	build_color_matrix_small(WinManager *wm, Rgb small_matrix[100][100], int x, int y)
 {
 	//temporary set from 100 to x0 for testing purpose
-	int width = 100;
-	int height = 50;
+	int width = 10;
+	int height = 10;
 	Rectangle screen_zone = create_rectangle(x, y, width, height);
 	XImage *screen_image = get_zone_to_check(wm, screen_zone);
-	printf(">>screen_reading.c \nbuild_color_matrix_small()\nIMG created: IMG WIDTH:%d\nIMG HEIGHT:%d<<\n\n",screen_image->width, screen_image->height);
+	printf(">>screen_reading.c \nbuild_color_matrix_small()\nIMG WIDTH:%d\nIMG HEIGHT:%d\n",screen_image->width, screen_image->height);
 	for (int j = 0; j < height; j++)
 	{
 		for (int i = 0; i < width; i++)
 		{
 			unsigned long pixel = XGetPixel(screen_image, i, j);
 			Rgb pixel_color = convert_pixel_to_rgb(screen_image, pixel);
-			small_matrix[y + j][x + i] = pixel_color;
+			/*Crash here: cannot acces small_matrix[y+j][x+i] address*/
+			/*small_matrix[y + j][x + i] = pixel_color;
 			printf("R:%d G:%d B:%d\n",small_matrix[y+j][x+i].r,
 			small_matrix[y+j][x+i].g, small_matrix[y+j][x+i].b);
 			move_mouse(wm, x+i, y+j);
-			usleep(1000);
+			*/
+			small_matrix[j][i] = pixel_color;
+			printf("R:%d G:%d B:%d \n",small_matrix[j][i].r,small_matrix[j][i].g, small_matrix[j][i].b);
+			move_mouse(wm, x+i, y+j);
+			usleep(10000);
 		}
 	}
 	printf("screen_reading.c \nbuild_color_matrix_small()\n>>Small Screen color matrix finish build:<<\n\n");
@@ -900,19 +905,40 @@ bool	rgb_difference(Rgb temp, Rgb ref, Rgb tol)
 		printf("xxNO MATCHxx\n");
 		return false;
 	}
+	printf(">>MATCH<<\n");
 	return true;
 }
 
-bool	rgb_match(WinManager *wm, Rgb small_matrix[100][100], Rgb ref, int tol, int x, int y)
+bool	rgb_match(WinManager *wm, Rgb small_matrix[100][100], Rgb ref, Rgb tol, int x, int y)
 {
 	bool match = true;
 	printf(">CHECK THE COLOR IN %d %d\n", x, y);
-	move(wm, x, y);
+	move_mouse(wm, x, y);
+	usleep(100000);
 	Rgb color = small_matrix[y][x];
 	printf("COLOR:(R:%d G:%d B:%d)-REF:(R:%d G:%d B:%d)\n\n",  color.r, color.g, color.b, ref.r, ref.g, ref.b);
-
+	match = rgb_difference(color, ref, tol);
+	return match;
 }
 
+int	count_matches(WinManager *wm, Rgb ref, Rgb small_matrix[100][100], Rgb tol, Point match[], int y, int x)
+{
+	int count = 0;
+	for (int j = y; j < y + 100; j++)
+	{
+		for (int i = x; i < x + 100; i++)
+		{
+			if (rgb_match(wm, small_matrix, ref, tol, x+i, y+j))
+			{
+				count++;
+				match[count].x = x+i;
+				match[count].y = y+j;
+			}
+		}
+	}
+	printf(">Found %d matching RGB\n",count);
+	return count;
+}
 
 /* 
 	>x:1561 y:711 w:100 h:100 (small matrix)
@@ -921,13 +947,18 @@ bool	rgb_match(WinManager *wm, Rgb small_matrix[100][100], Rgb ref, int tol, int
 */
 int	check_state(WinManager *wm)
 {
-	static Rgb small_matrix[100][100];
-	build_color_matrix_small(wm, small_matrix, 1561, 711);
+	static Rgb icon_matrix[100][100];
+	build_color_matrix_small(wm, icon_matrix, 1561, 711);
+	/*
 	Point pattern_list[100];
 	Rgb ref = {240, 50, 45};
-	int red_icon_pattern = count_matches(ref, small_matrix, 15, pattern_list);
-		
-
+	Rgb tol = {10,15,15};
+	int red_icon_pattern = count_matches(wm, ref, small_matrix,tol,pattern_list, 1561, 711);
+	if (red_icon_pattern > 10)
+		printf(">>>Combat mode\n");
+	return red_icon_pattern;	
+	*/
+	return 1;
 }
 
 Rectangle build_po_zone(Point p)

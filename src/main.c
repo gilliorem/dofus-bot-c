@@ -44,10 +44,8 @@ int main()
 
     wm = init_bot();
     //init_gtk(wm);
-    //check_weapon(wm);
-	check_hammer_zone(wm);
-    
-
+    check_hammer_zone(wm);
+    check_state(wm);
     return 0;
 }
 
