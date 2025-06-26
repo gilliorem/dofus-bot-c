@@ -17,4 +17,9 @@
 2. equip weapon
 	based on check weapon, will equip the needed weapon.
 
+26.06.2025
+1. Cereal pattern
+	fix reap wheat to fully work on every map.
+	fix common cereal pattern (4)
 
+2. Change map.

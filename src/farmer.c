@@ -60,7 +60,7 @@ int	reap_wheat(WinManager *wm)
 	static Rgb color_matrix_v[1920][1080];
 	build_color_matrix_vertical(wm, color_matrix_v);
 	Point wheat_position[50];
-	int wheats = find_matching_pattern_v(wheat_color_pattern_vertical,color_matrix_v, 5, wheat_position);
+	int wheats = find_matching_pattern_v(wheat_color_pattern_vertical,color_matrix_v, 3, wheat_position);
 	printf("scanning the map for wheat...\n");
 	for (int i = 0; i < wheats; i++)
 	{
@@ -68,7 +68,7 @@ int	reap_wheat(WinManager *wm)
 		usleep(100000);
 	}
 	printf("reap_wheat()>>>return;");
-	return 0;
+	//return 0;
 	if (wheats < 1)
 	{
 		printf("No wheat found, abort\n");

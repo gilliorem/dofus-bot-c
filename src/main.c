@@ -39,13 +39,16 @@ int	init_gtk(WinManager *wm)
     return status;
 }
 
-int main()
+int 	main()
 {
 
-    wm = init_bot();
-    //init_gtk(wm);
-    check_hammer_zone(wm);
-    check_state(wm);
-    return 0;
+	wm = init_bot();
+	//ready_button_visible(wm);
+	//    init_gtk(wm);
+
+	//reap_wheat(wm);
+	// check_hammer_zone(wm);
+	 check_state(wm);
+	return 0;
 }
 

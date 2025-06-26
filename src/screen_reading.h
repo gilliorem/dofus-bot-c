@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 extern Rgb orange_button;
+extern Rgb ready_button;
 extern Rgb ok_orange_button;
 extern Rgb log_in_button;
 extern Rgb wheat;
