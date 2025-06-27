@@ -32,6 +32,7 @@ typedef struct
 	unsigned char g;
 	unsigned char b;
 	char *color;
+	int	len;
 }Rgb;
 
 typedef struct

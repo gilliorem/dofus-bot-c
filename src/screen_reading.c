@@ -22,6 +22,7 @@ Rgb ready_button = {.r = 252, .g = 109, .b = 36};
 static Rgb screen_matrix[1080][1920];
 static Rgb screen_matrix_v[1920][1080];
 
+
 void update_screen_matrix(WinManager *wm)
 {
 	build_color_matrix(wm, screen_matrix);
@@ -40,6 +41,29 @@ Rgb (*get_screen_matrix(void))[1920]
 Rgb (*get_screen_matrix_v(void))[1080]
 {
 	return screen_matrix_v;
+}
+
+
+Rgb red_arrow_icon = {240, 39, 45, "Red(arrow icon)", 20};
+
+Rgb*	create_rgb_pattern(Rgb color)
+{
+	Rgb *color_pattern = malloc(color.len * sizeof(Rgb));
+	printf("Create pattern of color: R:%d G:%d B:%d\n", color.r,color.g, color.b);
+	for (int i = 0; i < color.len; i++)
+	{
+		color_pattern[i].r = color.r;
+		color_pattern[i].g = color.g;
+		color_pattern[i].b = color.b;
+	}
+	printf("------ ------\n");
+	for (int i = 0; i < color.len; i++)
+	{
+		printf("R:%d G:%d B:%d\n",color_pattern[i].r, color_pattern[i].g, color_pattern[i].b);
+		break;
+	}
+	printf(">>Color pattern has been created.\nreturn color_pattern\nColor:%s, len:%d\n",color.color, color.len);
+	return color_pattern;
 }
 
 Rgb white_pattern[6] = {
@@ -419,19 +443,6 @@ XImage	*get_zone_to_check(WinManager *wm, Rectangle rectangle)
 	return zone_to_check;
 }
 
-Rgb_pattern	create_rgb_pattern(Rgb color, int height, int width)
-{
-	Rgb_pattern color_pattern;
-	for (int j = 0; j < height; j++)
-	{
-		for (int i = 0; i < width; i++)
-		{
-			color_pattern.color = color;
-		}
-	}
-	return color_pattern;
-}
-
 int	get_bit_shift(unsigned long color_mask)
 {
 	int shift = 0;
@@ -571,12 +582,6 @@ int	ready_button_visible(WinManager *wm)
 	Point orange_list[50];
 	Rgb ref = ready_button;
 	Rgb tol = {10, 10, 30};
-	int orange_match = count_matches(wm, ref, small_matrix, tol, orange_list, 1486, 758);
-	if (orange_match > 10)
-	{
-		printf(">>ready button is visible: RETURN 1 \n");
-		return 1;
-	}
 	return 0;
 }
 
@@ -701,7 +706,7 @@ void	build_color_matrix_small(WinManager *wm, Rgb small_matrix[100][100], int x,
 	printf("screen_reading.c \nbuild_color_matrix_small()\n>>Small Screen color matrix finish build:<<\n\n");
 }
 
-bool	small_pattern_match(WinManager *wm, Rgb small_matrix[100][100], Rgb *ref_pattern, int pattern_len, int x, int y)
+bool	small_pattern_match(WinManager *wm, Rgb small_matrix[100][100], Rgb *ref_pattern, int pattern_len)
 {
 	int tolerance = 5;
 	bool match = true;
@@ -709,9 +714,8 @@ bool	small_pattern_match(WinManager *wm, Rgb small_matrix[100][100], Rgb *ref_pa
 	for (int i = 0; i < pattern_len; i++)
 	{
 		printf("Move to TMP COLOR\n");
-		move_mouse(wm, x + i, y);
-		usleep(1000);
-		Rgb color = small_matrix[y][x+i];
+		printf("R:%d G:%d B:%d\n",small_matrix[0][i].r,small_matrix[0][i].g,small_matrix[0][i].b);
+		Rgb color = small_matrix[0][i];
 		Rgb ref = ref_pattern[i];
 		printf(">>screen_reading.c\nbool small_pattern_match()\nCOLOR - REF:\nTEMP:(R:%d G:%d B:%d) - REF:(R:%d G:%d B:%d)\n\n",  color.r, color.g, color.b, ref.r, ref.g, ref.b);
 		if (abs(color.r - ref.r) > tolerance ||
@@ -723,7 +727,7 @@ bool	small_pattern_match(WinManager *wm, Rgb small_matrix[100][100], Rgb *ref_pa
 			break;
 		}
 			printf(">>MATCH<<\n");
-	}
+ 	}
 	printf("\n");
 	return match;
 }
@@ -739,7 +743,7 @@ int	find_matching_pattern_small(Rgb *ref_color_pattern, int x, int y, Rgb small_
 		printf("screen_reading.c\n>>find_matching_pattern_small()\nScaning line comparing pattern...\n");
 		for (int i = 0; i < (width - pattern_length); i++)
 		{
-			if (small_pattern_match(wm, small_matrix, ref_color_pattern, pattern_length, x + i, y + j))
+			if (small_pattern_match(wm, small_matrix, ref_color_pattern, pattern_length))
 			{
 				match_counter++;
 				matches[match_counter].x = x + i;
@@ -752,6 +756,25 @@ int	find_matching_pattern_small(Rgb *ref_color_pattern, int x, int y, Rgb small_
 	printf("Found %d matching pattern<<\n\n", match_counter);
 	return match_counter;
 }
+
+/* 
+	>x:1561 y:711 w:100 h:100 (small matrix)
+	>RGB Ref: R >= 200 G >= 40 <= 60 B >= 40 <= 50
+	>REF: 240 50 45: TOLERANCE: 15
+*/
+int	check_state(WinManager *wm)
+{
+	int x = 1561;
+      	int y = 711;
+	static Rgb small_matrix[100][100];
+	build_color_matrix_small(wm, small_matrix, x, y);
+	Point pattern_list[100];
+	Rgb *icon_pattern = create_rgb_pattern(red_arrow_icon);
+	small_pattern_match(wm, small_matrix, icon_pattern, red_arrow_icon.len, x, y);
+	int matches = find_matching_pattern_small(icon_pattern, x, y, small_matrix, icon_pattern->len, 15, pattern_list);
+	return 1;
+}
+
 void	build_color_matrix_vertical(WinManager *wm, Rgb color_matrix_v[1920][1080])
 {
 	Rectangle screen_zone = create_rectangle(0, 0, 1920, 1080);
@@ -794,7 +817,7 @@ int	find_matching_pattern_v(Rgb *ref_color_pattern, Rgb color_matrix_v[1920][108
 	{
 		for (int y = 0; y < 1080 - pattern_len; y++)
 		{
-			if (pattern_match_vertical(color_matrix_v, ref_color_pattern, pattern_len, x, y))
+	//		if (pattern_match_vertical(color_matrix_v, ref_color_pattern, pattern_len, x, y))
 			{
 				int mx = matches[match_count].y = y;
 				int my = matches[match_count].x = x;
@@ -856,79 +879,6 @@ int	find_matching_pattern(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], 
 	return match_counter;
 }
 
-bool	rgb_difference(Rgb temp, Rgb ref, Rgb tol)
-{
-	if (abs(temp.r - ref.r) > tol.r ||
-	abs(temp.b - ref.b) > tol.b)
-	{
-		printf("xxNO MATCHxx\n");
-		return false;
-	}
-	printf(">>MATCH<<\n");
-	return true;
-}
-
-bool	rgb_match(WinManager *wm, Rgb small_matrix[100][100], Rgb ref, Rgb tol, int x, int y)
-{
-	bool match = true;
-	 
-	printf(">CHECK THE COLOR IN %d %d\n", x, y);
-	move_mouse(wm, x, y);
-	usleep(100);
-	Rgb color = small_matrix[y][x];
-	printf("COLOR:(R:%d G:%d B:%d)-REF:(R:%d G:%d B:%d)\n\n",  color.r, color.g, color.b, ref.r, ref.g, ref.b);
-	//match = rgb_difference(color, ref, tol);
-	return match;
-}
-
-int	count_matches(WinManager *wm, Rgb ref, Rgb small_matrix[100][100], Rgb tol, Point match[], int x, int y)
-{
-	int count = 0;
-	for (int j = 0; j < 100; j++)
-	{
-		for (int i = 0; i < 100; i++)
-		{
-			move_mouse(wm, x+i, y+j);
-			printf("X:%d  Y:%d\n", x+i, y+i);
-			usleep(10);
-			rgb_match(wm, small_matrix, ref, tol, x+i, y+j);
-			/*
-			if (rgb_match(wm, small_matrix, ref, tol, x+i, y+j))
-			{
-				count++;
-				match[count].x = x+i;
-				match[count].y = y+j;
-			}
-			*/
-		}
-	}
-	printf(">Found %d matching RGB\n",count);
-	return count;
-}
-
-/* 
-	>x:1561 y:711 w:100 h:100 (small matrix)
-	>RGB Ref: R >= 200 G >= 40 <= 60 B >= 40 <= 50
-	>REF: 240 50 45: TOLERANCE: 15
-*/
-int	check_state(WinManager *wm)
-{
-	static Rgb icon_matrix[100][100];
-	build_color_matrix_small(wm, icon_matrix, 1561, 711);
-	/*
-	 * First need to improve the ready_button_visible()
-	 */
-	Point pattern_list[100];
-	Rgb ref = {240, 50, 45};
-	Rgb tol = {10,15,15};
-	int red_icon_pattern = count_matches(wm, ref, icon_matrix, tol,pattern_list, 1561, 711);
-	if (red_icon_pattern > 10)
-	{
-		printf(">>>Combat mode\n");
-		return red_icon_pattern;	
-	}
-	return 1;
-}
 
 Rectangle build_po_zone(Point p)
 {

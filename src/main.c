@@ -48,7 +48,8 @@ int 	main()
 
 	//reap_wheat(wm);
 	// check_hammer_zone(wm);
-	 check_state(wm);
+	check_state(wm);
+	
 	return 0;
 }
 

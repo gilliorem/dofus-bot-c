@@ -11,6 +11,7 @@ extern Rgb ready_button;
 extern Rgb ok_orange_button;
 extern Rgb log_in_button;
 extern Rgb wheat;
+extern Rgb red_arrow_icon;
 extern Rgb context_menu_light_gray[3];
 extern Rgb context_menu_dark_gray[3];
 extern Rgb context_menu_orange[3];
@@ -41,6 +42,7 @@ void	update_screen_matrix_v(WinManager *wm);
 Rgb	(*get_screen_matrix_v(void))[1080];
 
 void get_grey_tile_pattern(Rgb grey_tile_color, Rgb grey_pattern[89]);
+Rgb*	create_rgb_pattern(Rgb color);
 Rgb* red_circle_pattern(int len);
 Rectangle	create_rectangle(int x, int y, unsigned int width, unsigned int height);
 XImage	*get_zone_to_check(WinManager *wm, Rectangle rectangle);
@@ -72,7 +74,7 @@ bool	pattern_match_vertical(Rgb color_matrix_v[1920][1080], Rgb *ref_color_patte
 int	find_matching_pattern_v(Rgb *ref_color_pattern, Rgb color_matrix_v[1920][1080], int pattern_len, Point matches[]);
 
 void	build_color_matrix_small(WinManager *wm, Rgb color_matrix[100][100], int x, int y);
-bool	small_pattern_match(WinManager *wm, Rgb small_matrix[100][100], Rgb *ref_pattern, int pattern_len, int x, int y);
+bool	small_pattern_match(WinManager *wm, Rgb small_matrix[100][100], Rgb *ref_pattern, int pattern_len);
 int	find_matching_pattern_small(Rgb *ref_color_pattern, int height, int width, Rgb color_matrix[height][width], int pattern_length, int tolerance, Point matches[216]);
 
 Rectangle build_po_zone(Point p);
