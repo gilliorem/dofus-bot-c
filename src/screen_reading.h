@@ -41,6 +41,7 @@ Rgb	(*get_screen_matrix(void))[1920];
 void	update_screen_matrix_v(WinManager *wm);
 Rgb	(*get_screen_matrix_v(void))[1080];
 
+int	check_color_pattern(WinManager *wm, Rgb *ref, XImage *img, int len);
 void get_grey_tile_pattern(Rgb grey_tile_color, Rgb grey_pattern[89]);
 Rgb*	create_rgb_pattern(Rgb color);
 Rgb* red_circle_pattern(int len);
@@ -73,9 +74,9 @@ void	build_color_matrix_vertical(WinManager *wm, Rgb color_matrix_v[1920][1080])
 bool	pattern_match_vertical(Rgb color_matrix_v[1920][1080], Rgb *ref_color_pattern, int pattern_len, int y, int x);
 int	find_matching_pattern_v(Rgb *ref_color_pattern, Rgb color_matrix_v[1920][1080], int pattern_len, Point matches[]);
 
-void	build_color_matrix_small(WinManager *wm, Rgb color_matrix[100][100], int x, int y);
-bool	small_pattern_match(WinManager *wm, Rgb small_matrix[100][100], Rgb *ref_pattern, int pattern_len);
-int	find_matching_pattern_small(Rgb *ref_color_pattern, int height, int width, Rgb color_matrix[height][width], int pattern_length, int tolerance, Point matches[216]);
+void	build_color_matrix_small(WinManager *wm, Rgb color_matrix_small[100][100], int x, int y);
+bool	small_pattern_match(Rgb small_matrix[100][100], Rgb *ref_pattern, int pattern_len);
+int	find_matching_pattern_small(Rgb *ref_color_pattern, int x, int y, Rgb color_matrix_small[100][100], int pattern_length, int tolerance, Point matches[216]);
 
 Rectangle build_po_zone(Point p);
 int find_matching_pattern_in_rect(Rgb *ref, int pattern_len, int tol,

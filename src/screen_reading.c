@@ -457,18 +457,15 @@ int	get_bit_shift(unsigned long color_mask)
 Rgb	convert_pixel_to_rgb(XImage *zone_to_check, unsigned long pixel)
 {
 	Rgb rgb;
-	int red_shift, green_shift, blue_shift = 0;
-	red_shift = get_bit_shift(zone_to_check->red_mask);
-	green_shift = get_bit_shift(zone_to_check->green_mask);
-	blue_shift = get_bit_shift(zone_to_check->blue_mask);
+	int red_shift = get_bit_shift(zone_to_check->red_mask);
+	int green_shift = get_bit_shift(zone_to_check->green_mask);
+	int blue_shift = get_bit_shift(zone_to_check->blue_mask);
+
 	rgb.r = (pixel & zone_to_check->red_mask) >> red_shift;
 	rgb.g = (pixel & zone_to_check->green_mask) >> green_shift;
 	rgb.b = (pixel & zone_to_check->blue_mask) >> blue_shift;
 	return rgb;
 }
-
-// need to compare a sequence of pixel_rgb in a given zone
-
 
 int	print_color_in_frame(WinManager *wm, XImage *zone_to_check)
 {
@@ -490,6 +487,10 @@ int	print_color_in_frame(WinManager *wm, XImage *zone_to_check)
 	return 1;
 }
 
+/* TO BE MOVED */
+/* TO BE MODIFIED
+ * check_color(Rgb log_in_color)
+ */
 int	check_log_in(XImage *zone_to_check)
 {
 	int white_counter = 0;
@@ -515,6 +516,10 @@ int	check_log_in(XImage *zone_to_check)
 	return 0;
 }
 
+/* TO BE MOVED */
+/* TO BE MODIFIED 
+ * check_pattern(Rgb *orange_color_pattern)
+ */
 int	check_orange_context_menu_color(XImage *zone_to_check, Rgb orange_button, int tolerance)
 {
 	int orange_pixel_counter = 0;
@@ -540,6 +545,10 @@ int	check_orange_context_menu_color(XImage *zone_to_check, Rgb orange_button, in
 	return orange_pixel_counter;
 }
 
+/* TO BE REMOVE
+ * TO BE MODIFIED
+ * -> check_color(orange)
+ */
 int	check_in_game(WinManager *wm)
 {
 	Rgb in_game_ref = {.r = 131, .g = 82, .b = 1};
@@ -575,6 +584,7 @@ int	check_in_game(WinManager *wm)
  * same for the ys.
  */
 
+/* TO BE MODIFIED */
 int	ready_button_visible(WinManager *wm)
 {
 	static Rgb small_matrix[100][100];
@@ -585,6 +595,7 @@ int	ready_button_visible(WinManager *wm)
 	return 0;
 }
 
+/* TO BE MODIFIED */
 int	ok_button_visible(WinManager *wm)
 {
 	Rectangle ok_button_zone = create_rectangle(923, 497, 151, 18);
@@ -606,6 +617,7 @@ int	ok_button_visible(WinManager *wm)
 	return 0;
 }
 
+/* TO BE MODIFIED */
 int	full_pods(WinManager *wm)
 {
 	Rectangle pods_bar_zone = create_rectangle(1224, 469, 16, 18);
@@ -623,12 +635,13 @@ void	 print_color_sequence(WinManager *wm, Rectangle zone_r)
 {
 	XImage *image_zone = get_zone_to_check(wm, zone_r);
 	print_color_in_frame(wm, image_zone);
-	sleep(4);
+	// why sleep ?
+	sleep(1);
 	XSync(wm->display, False);
 }
 
 
-int	check_color_pattern(WinManager *wm, Rgb **ref, XImage *img, int len)
+int	check_color_pattern(WinManager *wm, Rgb *ref, XImage *img, int len)
 {
 	Rgb color_pattern[img->height][img->width];
 
@@ -700,15 +713,24 @@ void	build_color_matrix_small(WinManager *wm, Rgb small_matrix[100][100], int x,
 			printf("R:%d G:%d B:%d \n",small_matrix[j][i].r,small_matrix[j][i].g, small_matrix[j][i].b);
 			//uncomment these two line bellow to see the matrix building.
 			move_mouse(wm, x+i, y+j);
-			usleep(10);
+			usleep(100);
 		}
 	}
 	printf("screen_reading.c \nbuild_color_matrix_small()\n>>Small Screen color matrix finish build:<<\n\n");
 }
 
-bool	small_pattern_match(WinManager *wm, Rgb small_matrix[100][100], Rgb *ref_pattern, int pattern_len)
+/* My matrix is build. now I need to check
+ * matrix pixel color with pattern
+ * lets say my pattern is 253 42 49 (*10)
+ * then I need to see if in my matrix I have this pattern.
+ *  I set the pattern.
+ *  I go through my matrix. I check for the color.
+ *  lets try to do it for one pixel only first
+ */ 
+
+bool	small_pattern_match(Rgb small_matrix[100][100], Rgb *ref_pattern, int pattern_len)
 {
-	int tolerance = 5;
+	int tolerance = 15;
 	bool match = true;
 
 	for (int i = 0; i < pattern_len; i++)
@@ -724,8 +746,9 @@ bool	small_pattern_match(WinManager *wm, Rgb small_matrix[100][100], Rgb *ref_pa
 		{
 			printf("xxNOT MATCHxx\n");
 			match = false;
-			break;
+			//break;
 		}
+		else
 			printf(">>MATCH<<\n");
  	}
 	printf("\n");
@@ -735,7 +758,6 @@ bool	small_pattern_match(WinManager *wm, Rgb small_matrix[100][100], Rgb *ref_pa
 int	find_matching_pattern_small(Rgb *ref_color_pattern, int x, int y, Rgb small_matrix[100][100], int pattern_length, int tolerance, Point matches[])
 {
 	int	match_counter = 0;
-	WinManager *wm = init_bot();
 	int height = 100;
 	int width = 100;
 	for (int j = 0; j < height; j++)
@@ -743,7 +765,7 @@ int	find_matching_pattern_small(Rgb *ref_color_pattern, int x, int y, Rgb small_
 		printf("screen_reading.c\n>>find_matching_pattern_small()\nScaning line comparing pattern...\n");
 		for (int i = 0; i < (width - pattern_length); i++)
 		{
-			if (small_pattern_match(wm, small_matrix, ref_color_pattern, pattern_length))
+			if (small_pattern_match(small_matrix, ref_color_pattern, pattern_length))
 			{
 				match_counter++;
 				matches[match_counter].x = x + i;
@@ -757,6 +779,54 @@ int	find_matching_pattern_small(Rgb *ref_color_pattern, int x, int y, Rgb small_
 	return match_counter;
 }
 
+int	check_color(Rgb ref, int w, int h, Rgb small_matrix[100][100])
+{
+	Rgb tolerance = {25, 15, 15};
+	for (int j = 0; j < h; j++)
+	{
+		for (int i = 0; i < w; i++)
+		{
+			for (int k = 0; k < 20; k++)
+			{
+				Rgb color = small_matrix[j][i+k];
+				if (abs(color.r - ref.r) < tolerance.r
+				&& abs(color.g - ref.g) < tolerance.g
+				&& abs(color.b - ref.b) < tolerance.b)
+				{
+					printf("RGB PATTERNS OF 20 PIXELS MATCH.\n");
+					return 1;
+				}
+				else
+				{
+					printf("PATTERNS DONT MATCH\n");
+					break;
+				}
+
+			}
+
+		}
+	}
+	printf("NO RGB match in this small matrix.\n");
+	return 0;
+}
+
+/* now I want to count pattern not single color.
+ * so I set a bool to true.
+ * I go in the loop of pattern length.
+ * true true true true true true true true true true true true true true false > return false
+ * true true true true true treu ture true true true ture ture ture ture ture uter treu true treu true true true true true true true true treu true treu treu treu true true true > ok
+*/
+int	count_match(Rgb ref, Rgb small_matrix[100][100])
+{
+	int counter = 0;
+	for (int j = 0; j < 100; j++)
+	{
+		for (int i = 0; i < 100; i++)
+			counter += check_color(ref, i, j, small_matrix);
+	}
+	printf("MATCHES:%d\n",counter);
+	return (counter);
+}
 /* 
 	>x:1561 y:711 w:100 h:100 (small matrix)
 	>RGB Ref: R >= 200 G >= 40 <= 60 B >= 40 <= 50
@@ -768,10 +838,12 @@ int	check_state(WinManager *wm)
       	int y = 711;
 	static Rgb small_matrix[100][100];
 	build_color_matrix_small(wm, small_matrix, x, y);
-	Point pattern_list[100];
-	Rgb *icon_pattern = create_rgb_pattern(red_arrow_icon);
-	small_pattern_match(wm, small_matrix, icon_pattern, red_arrow_icon.len, x, y);
-	int matches = find_matching_pattern_small(icon_pattern, x, y, small_matrix, icon_pattern->len, 15, pattern_list);
+	//Point pattern_list[100];
+	//Rgb *icon_pattern = create_rgb_pattern(red_arrow_icon);;
+	Rgb ref = {40, 40, 40};
+	//small_pattern_match(small_matrix, icon_pattern, red_arrow_icon.len);
+//	int matches = find_matching_pattern_small(icon_pattern, x, y, small_matrix, icon_pattern->len, 15, pattern_list);
+	int matches = count_match(ref, small_matrix);
 	return 1;
 }
 

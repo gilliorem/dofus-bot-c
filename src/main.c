@@ -43,12 +43,15 @@ int 	main()
 {
 
 	wm = init_bot();
+	Rectangle zone = create_rectangle(1920/2,1080/2,100,100);
+	XImage *img = get_zone_to_check(wm, zone);
+	check_color_pattern(wm, context_menu_light_gray, img, 3);
 	//ready_button_visible(wm);
 	//    init_gtk(wm);
 
 	//reap_wheat(wm);
 	// check_hammer_zone(wm);
-	check_state(wm);
+	//check_state(wm);
 	
 	return 0;
 }
