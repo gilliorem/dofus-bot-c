@@ -4,7 +4,7 @@
 #include "mouse_manager.h"
 #include "window_manager.h"
 #include "types.h"
-#include <stdio.h>
+
 
 extern Rgb orange_button;
 extern Rgb ready_button;
@@ -43,7 +43,7 @@ Rgb	(*get_screen_matrix_v(void))[1080];
 
 int	check_color_pattern(WinManager *wm, Rgb **ref, XImage *img, int len);
 void get_grey_tile_pattern(Rgb grey_tile_color, Rgb grey_pattern[89]);
-Rgb*	create_rgb_pattern(Rgb color);
+Rgb_pattern	*create_rgb_pattern(Rgb color, int width);
 Rgb* red_circle_pattern(int len);
 Rectangle	create_rectangle(int x, int y, unsigned int width, unsigned int height);
 XImage	*get_zone_to_check(WinManager *wm, Rectangle rectangle);
@@ -75,9 +75,13 @@ bool	pattern_match_vertical(Rgb color_matrix_v[1920][1080], Rgb *ref_color_patte
 int	find_matching_pattern_v(Rgb *ref_color_pattern, Rgb color_matrix_v[1920][1080], int pattern_len, Point matches[]);
 
 void	build_color_matrix_small(WinManager *wm, Rgb color_matrix_small[100][100], int x, int y);
-bool	small_pattern_match(Rgb small_matrix[100][100], Rgb *ref_pattern, Rgb tol);
-int	find_matching_pattern_small(Rgb *ref, int x, int y, Rgb color_matrix_small[100][100], int pattern_length, int tolerance, Point matches[216]);
-
+bool	small_pattern_match(Rgb small_matrix[100][100], Rgb_pattern ref_pattern, Rgb tol);
+int	find_matching_pattern_small(Rgb_pattern ref, int x, int y,
+		       			Rgb color_matrix_small[100][100],
+				       	Point matches[216],
+				       	Rgb tolerance);
+int	check_element(WinManager *wm, Rgb ref, int width, int x, int y, Rgb tol);
+int	check_ready_button(WinManager *wm);
 Rectangle build_po_zone(Point p);
 int find_matching_pattern_in_rect(Rgb *ref, int pattern_len, int tol,
                                   Rgb matrix[1080][1920],

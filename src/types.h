@@ -32,7 +32,6 @@ typedef struct
 	unsigned char g;
 	unsigned char b;
 	char *color;
-	int	len;
 }Rgb;
 
 typedef struct
@@ -45,9 +44,17 @@ typedef struct
 
 typedef struct
 {
-	Rgb color;
-	int height;
+	Rgb* color;
 	int width;
 }Rgb_pattern;
+
+typedef struct
+{
+	Rgb color;
+	int width;
+	Rgb tol;
+	Point pos;
+	char *name;
+}ElementPattern;
 
 #endif

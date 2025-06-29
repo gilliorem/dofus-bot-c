@@ -17,8 +17,9 @@ int	check_hammer_zone(WinManager *wm)
 	build_color_matrix_small(wm, hammer_matrix, 1180, 943);
 	Point white_pixel_list[50];
 	Rgb white = {255, 255, 255};
-	Rgb *white_pattern = create_rgb_pattern(white);
-	int white_pixel_pattern = find_matching_pattern_small(white_pattern, 1180, 943, hammer_matrix, 2, 5, white_pixel_list);
+	Rgb_pattern *white_pattern = create_rgb_pattern(white, 10);
+	Rgb tol = {10, 10, 10};
+	int white_pixel_pattern = find_matching_pattern_small(*white_pattern, 1180, 943, hammer_matrix, white_pixel_list, tol);
 	printf("Scanning hammer zone...\n");
 	for (int i = 0; i < white_pixel_pattern; i++)
 	{
@@ -98,14 +99,14 @@ void	tactical_mode(WinManager *wm)
 	if (check_tactical_mode(wm) == 1)
 		return;
 	move_mouse(wm, 1500, 760);
-	sleep(.5);
+	sleep(1);
 	fake_click(wm, 1, True);
 }
 
 void	place_player(WinManager *wm, Point placement)
 {
 	move_mouse(wm, placement.x, placement.y);
-	sleep(.5);
+	sleep(1);
 	fake_click(wm, 1, True);
 }
 

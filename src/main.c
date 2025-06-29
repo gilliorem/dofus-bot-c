@@ -41,12 +41,7 @@ int	init_gtk(WinManager *wm)
 int 	main()
 {
 	wm = init_bot();
-//	reap_hop(wm);
-	//reap_wheat(wm);
-	Rgb small_matrix[100][100];
-	//build_color_matrix_small(wm, small_matrix, 1450, 750);
-	
-	
+	check_ready_button(wm);
 
 	return 0;
 }

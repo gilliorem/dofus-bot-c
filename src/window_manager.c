@@ -29,7 +29,7 @@ WinManager	*init_bot()
 	WinManager *wm = setXConnection();
 	if (!wm) 
 	{
-		printf("COUL NOT MAKE THE CONNECTION WITH X SERVER\n");
+		printf("COULD NOT MAKE THE XCONNECTION\n");
 		return NULL;
 	}
 	return (wm);

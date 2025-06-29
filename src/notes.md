@@ -128,3 +128,58 @@ Reap wheat
 - Find path
 	>Draw path.
 	>Move
+
+### WHY IS THIS PROJECT TAKING MORE MORE AND TIME AND HOW TO FASTER THE PROCESS
+The more I code this project, the more there is to code. The more issue and bugs popping from every corner.
+-
+	Pattern finding algo (hor/ver/rand...)
+	Icon checking (ready button, arrow)
+	Structural elements (Rgb, Rgb_pattern, Element, Ready_button)
+	Path finding
+	Gui
+	...
+The list simply does not stop.
+But I need to stop go across my code and fix this and this and this **RANDOMLY**
+I need a bigger plan that every changement I make is justified and follow the rules accordingly.
+
+Here we go for the plan:
+Just to make things clear, all these things needs to be fixed. And they are gonna be. but not **RANDOMLY**.
+The first idea is still to make a working bot. everything else is secondary. 
+
+Now. I need to focus on 1 thing: The normal mode and combat mode.
+I need to be able to spot the switching state.
+NORMAL > COMBAT
+COMBAT > NORMAL
+
+To perform the NORMAL to COMBAT I perform 2 check:
+	The ready button: After each reap I check whether I can see the ready button
+		No > Normal mode (Keep reaping)
+		Yes > Combat mode (Switch to weapon, detect enemy, detect player, place the closest, click ready button)
+	While I'm still in Combat mode > Check for the red-arrow-icon in the bottom right corner
+		Yes > Still in combat mode (Check who's turn is it. My turn>check pos>get closer or attack)
+		No > Back to Normal mode: Check any window, equip the scythe and reap some more.
+
+
+In this specific case I need to check at least 3 elements on map
+	The ready button
+	The Hammer
+	The Scythe
+	The red-arrow-icon
+	The player (different from red tile check)
+	The ennemy (different from blue tile check)
+	The red tiles
+	The blue tiles
+	The orange in the the circle (player's turn)
+	The Tactical-mode-icon
+	The light grey tile
+	The dark grey tile
+	The red circle
+	The blue circle
+	The boost spell 1-2-3
+	The Attack spell 1-2
+	The Move points
+	The Action points
+	The Pass-turn-button
+	The end-combat window
+	The info-window (in case I Level-up)
+--------------------------- --------------------------- ---------------------------
