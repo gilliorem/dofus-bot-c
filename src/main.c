@@ -23,7 +23,6 @@ GtkApplication *get_gtk_app()
 	return (app);
 }
 
-// wrapper appelé quand GTK est activé
 static void on_activate(GtkApplication *app, gpointer user_data)
 {
     WinManager *wm = (WinManager *)user_data;
@@ -41,18 +40,14 @@ int	init_gtk(WinManager *wm)
 
 int 	main()
 {
-
 	wm = init_bot();
-	Rectangle zone = create_rectangle(1920/2,1080/2,100,100);
-	XImage *img = get_zone_to_check(wm, zone);
-	check_color_pattern(wm, context_menu_light_gray, img, 3);
-	//ready_button_visible(wm);
-	//    init_gtk(wm);
-
+//	reap_hop(wm);
 	//reap_wheat(wm);
-	// check_hammer_zone(wm);
-	//check_state(wm);
+	Rgb small_matrix[100][100];
+	//build_color_matrix_small(wm, small_matrix, 1450, 750);
 	
+	
+
 	return 0;
 }
 

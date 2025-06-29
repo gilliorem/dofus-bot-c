@@ -22,7 +22,6 @@ Rgb ready_button = {.r = 252, .g = 109, .b = 36};
 static Rgb screen_matrix[1080][1920];
 static Rgb screen_matrix_v[1920][1080];
 
-
 void update_screen_matrix(WinManager *wm)
 {
 	build_color_matrix(wm, screen_matrix);
@@ -641,7 +640,7 @@ void	 print_color_sequence(WinManager *wm, Rectangle zone_r)
 }
 
 
-int	check_color_pattern(WinManager *wm, Rgb *ref, XImage *img, int len)
+int	check_color_pattern(WinManager *wm, Rgb **ref, XImage *img, int len)
 {
 	Rgb color_pattern[img->height][img->width];
 
@@ -713,7 +712,7 @@ void	build_color_matrix_small(WinManager *wm, Rgb small_matrix[100][100], int x,
 			printf("R:%d G:%d B:%d \n",small_matrix[j][i].r,small_matrix[j][i].g, small_matrix[j][i].b);
 			//uncomment these two line bellow to see the matrix building.
 			move_mouse(wm, x+i, y+j);
-			usleep(100);
+			usleep(1000);
 		}
 	}
 	printf("screen_reading.c \nbuild_color_matrix_small()\n>>Small Screen color matrix finish build:<<\n\n");
@@ -728,21 +727,20 @@ void	build_color_matrix_small(WinManager *wm, Rgb small_matrix[100][100], int x,
  *  lets try to do it for one pixel only first
  */ 
 
-bool	small_pattern_match(Rgb small_matrix[100][100], Rgb *ref_pattern, int pattern_len)
+bool	small_pattern_match(Rgb small_matrix[100][100], Rgb *ref_pattern, Rgb tol)
 {
-	int tolerance = 15;
 	bool match = true;
 
-	for (int i = 0; i < pattern_len; i++)
+	for (int i = 0; i < ref_pattern->len; i++)
 	{
-		printf("Move to TMP COLOR\n");
-		printf("R:%d G:%d B:%d\n",small_matrix[0][i].r,small_matrix[0][i].g,small_matrix[0][i].b);
+	//	printf("Move to TMP COLOR\n");
+	//	printf("R:%d G:%d B:%d\n",small_matrix[0][i].r,small_matrix[0][i].g,small_matrix[0][i].b);
 		Rgb color = small_matrix[0][i];
 		Rgb ref = ref_pattern[i];
-		printf(">>screen_reading.c\nbool small_pattern_match()\nCOLOR - REF:\nTEMP:(R:%d G:%d B:%d) - REF:(R:%d G:%d B:%d)\n\n",  color.r, color.g, color.b, ref.r, ref.g, ref.b);
-		if (abs(color.r - ref.r) > tolerance ||
-		abs(color.g - ref.g) > tolerance ||
-		abs(color.b - ref.b) > tolerance)
+		printf(">>screen_reading.c  bool small_pattern_match()\nCOLOR - REF:\nTEMP:(R:%d G:%d B:%d) - REF:(R:%d G:%d B:%d)\n\n",  color.r, color.g, color.b, ref.r, ref.g, ref.b);
+		if (abs(color.r - ref.r) > tol.r ||
+		abs(color.g - ref.g) > tol.g ||
+		abs(color.b - ref.b) > tol.b)
 		{
 			printf("xxNOT MATCHxx\n");
 			match = false;
@@ -755,9 +753,10 @@ bool	small_pattern_match(Rgb small_matrix[100][100], Rgb *ref_pattern, int patte
 	return match;
 }
 
-int	find_matching_pattern_small(Rgb *ref_color_pattern, int x, int y, Rgb small_matrix[100][100], int pattern_length, int tolerance, Point matches[])
+int	find_matching_pattern_small(Rgb *ref, int x, int y, Rgb small_matrix[100][100], int pattern_length, int tolerance, Point matches[])
 {
-	int	match_counter = 0;
+	Rgb tol = {25, 15, 15};
+	int match_counter = 0;
 	int height = 100;
 	int width = 100;
 	for (int j = 0; j < height; j++)
@@ -765,7 +764,7 @@ int	find_matching_pattern_small(Rgb *ref_color_pattern, int x, int y, Rgb small_
 		printf("screen_reading.c\n>>find_matching_pattern_small()\nScaning line comparing pattern...\n");
 		for (int i = 0; i < (width - pattern_length); i++)
 		{
-			if (small_pattern_match(small_matrix, ref_color_pattern, pattern_length))
+			if (small_pattern_match(small_matrix, ref, tol))
 			{
 				match_counter++;
 				matches[match_counter].x = x + i;
@@ -889,7 +888,7 @@ int	find_matching_pattern_v(Rgb *ref_color_pattern, Rgb color_matrix_v[1920][108
 	{
 		for (int y = 0; y < 1080 - pattern_len; y++)
 		{
-	//		if (pattern_match_vertical(color_matrix_v, ref_color_pattern, pattern_len, x, y))
+			if (pattern_match_vertical(color_matrix_v, ref_color_pattern, pattern_len, x, y))
 			{
 				int mx = matches[match_count].y = y;
 				int my = matches[match_count].x = x;
