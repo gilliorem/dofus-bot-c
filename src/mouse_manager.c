@@ -3,8 +3,9 @@
 #include <stdlib.h>
 #include "types.h"
 #include "screen_reading.h"
+#include <unistd.h>
 
-void	get_mouse_coordinates(WinManager *wm, Point point)
+void	get_mouse_coordinates(WinManager *wm, Point *point)
 {
 	Window root_return, child_return;
 	int root_x_return, root_y_return;
@@ -21,11 +22,11 @@ void	get_mouse_coordinates(WinManager *wm, Point point)
 		&child_return,
 		&root_x_return,
 		&root_y_return,
-		&point.x,
-		&point.y,
+		&point->x,
+		&point->y,
 		&mask_return);
 
-	printf("(x:%d, y:%d)", point.x, point.y);
+	printf("(x:%d, y:%d)", point->x, point->y);
 	printf("\n");
 	sleep(1);
 }
@@ -46,6 +47,15 @@ void fake_click(WinManager *wm, int button, Bool down)
 	XSync(wm->display, False); 
 }
 
+void	key_press(WinManager *wm, unsigned int keycode)
+{
+	XTestFakeKeyEvent(wm->display, keycode, True, CurrentTime);
+//	printf("%d Press\n", keycode);
+	XTestFakeKeyEvent(wm->display, keycode, False, CurrentTime);
+//	printf("%d released\n", keycode);
+	XSync(wm->display, False);
+}
+
 void	click(WinManager *wm, int x, int y)
 {
 	move_mouse(wm, x, y);
@@ -58,7 +68,7 @@ void	double_click(WinManager *wm, int x, int y)
 {
 	move_mouse(wm, x, y);
 	fake_click(wm, 1, True);
-	sleep(.1);
+	usleep(1000000);
 	fake_click(wm, 1, True);
 }
 

@@ -58,8 +58,6 @@ Rgb_pattern*	create_rgb_pattern(Rgb color, int width)
 	return color_pattern;
 }
 
-
-
 Rgb white_pattern[6] = {
 	{.r = 255, .g = 255, .b = 255},
 	{.r = 255, .g = 255, .b = 255},
@@ -690,6 +688,72 @@ void	build_color_matrix(WinManager *wm, Rgb color_matrix[1080][1920])
 	printf(">>Screen color matrix built.\n");
 }
 
+void	build_smaller_matrix(WinManager *wm, Rgb smaller_matrix[50][50], int x, int y)
+{
+	int w = 50;
+	int h = 50;
+	Rectangle screen_zone = create_rectangle(x,y,w,h);
+	XImage *screen_image = get_zone_to_check(wm, screen_zone);
+	for (int j = 0; j < h; j++)
+	{
+		for (int i = 0; i < w; i++)
+		{
+			unsigned long p = XGetPixel(screen_image, i, j);
+			Rgb color = convert_pixel_to_rgb(screen_image, p);
+			smaller_matrix[j][i] = color;
+			printf("R:%d G:%d B:%d\n", color.r, color.g, color.b);
+			move_mouse(wm, x+i, y+j);
+			usleep(1000);
+		}
+	}
+	printf(">>smaller_matrix 50x50 has been built from x:%d y:%d\n", x, y);
+	printf("TESTING (SLEEP 3 SEC)");
+	sleep(3);
+}
+
+bool	smaller_pattern_match(Rgb smaller_matrix[50][50], Rgb_pattern ref_pattern, Rgb tol, int start_x, int start_y)
+{
+	bool match = true;
+	for (int i = 0; i < ref_pattern.width; i++)
+	{
+		Rgb color = smaller_matrix[start_y][start_x + i];
+		Rgb ref = ref_pattern.color[i];
+		printf(">>screen_reading.c  bool small_pattern_match()\nCOLOR - REF:\nTEMP:(R:%d G:%d B:%d) - REF:(R:%d G:%d B:%d)\n\n",  color.r, color.g, color.b, ref.r, ref.g, ref.b);
+		if (abs(color.r - ref.r) > tol.r ||
+		abs(color.g - ref.g) > tol.g ||
+		abs(color.b - ref.b) > tol.b)
+		{
+			printf("xxNOT MATCHxx\n");
+			match = false;
+			return match;
+		}
+ 	}
+	printf(">>MATCH<<\n");
+	return match;
+}
+
+int	find_matching_pattern_smaller(Rgb_pattern ref, int x, int y, Rgb smaller_matrix[50][50], Point matches[], Rgb tol)
+{
+	int match_counter = 0;
+	int height = 50;
+	int width = 50;
+	for (int j = 0; j < height; j++)
+	{
+		for (int i = 0; i < (width - ref.width); i++)
+		{
+			if (smaller_pattern_match(smaller_matrix, ref, tol, i, j))
+			{
+				match_counter++;
+				matches[match_counter].x = x + i;
+				matches[match_counter].y = y + j;
+			}
+		}
+	}
+	printf("Found %d matching pattern<<\n\n", match_counter);
+	return match_counter;
+}
+
+
 void	build_color_matrix_small(WinManager *wm, Rgb small_matrix[100][100], int x, int y)
 {
 	int width = 100;
@@ -724,13 +788,13 @@ void	build_color_matrix_small(WinManager *wm, Rgb small_matrix[100][100], int x,
  *  lets try to do it for one pixel only first
  */ 
 
-bool	small_pattern_match(Rgb small_matrix[100][100], Rgb_pattern ref_pattern, Rgb tol)
+bool	small_pattern_match(Rgb small_matrix[100][100], Rgb_pattern ref_pattern, Rgb tol, int start_x, int start_y)
 {
 	bool match = true;
 
 	for (int i = 0; i < ref_pattern.width; i++)
 	{
-		Rgb color = small_matrix[0][i];
+		Rgb color = small_matrix[start_y][start_x + i];
 		Rgb ref = ref_pattern.color[i];
 		printf(">>screen_reading.c  bool small_pattern_match()\nCOLOR - REF:\nTEMP:(R:%d G:%d B:%d) - REF:(R:%d G:%d B:%d)\n\n",  color.r, color.g, color.b, ref.r, ref.g, ref.b);
 		if (abs(color.r - ref.r) > tol.r ||
@@ -739,13 +803,10 @@ bool	small_pattern_match(Rgb small_matrix[100][100], Rgb_pattern ref_pattern, Rg
 		{
 			printf("xxNOT MATCHxx\n");
 			match = false;
-			//break;
+			return match;
 		}
-		else
-			printf(">>MATCH<<\n");
-		//usleep(10000);
  	}
-	printf("\n");
+	printf(">>MATCH<<\n");
 	return match;
 }
 
@@ -758,7 +819,7 @@ int	find_matching_pattern_small(Rgb_pattern ref, int x, int y, Rgb small_matrix[
 	{
 		for (int i = 0; i < (width - ref.width); i++)
 		{
-			if (small_pattern_match(small_matrix, ref, tol))
+			if (small_pattern_match(small_matrix, ref, tol, i, j))
 			{
 				match_counter++;
 				matches[match_counter].x = x + i;
@@ -773,6 +834,26 @@ int	find_matching_pattern_small(Rgb_pattern ref, int x, int y, Rgb small_matrix[
 /* Return 0: count < 40: cannot find ready button on screen.
  * Return 1: count > 40: can find ready button on screen.
  */
+
+int	check_smaller_element(WinManager *wm, ElementPattern element)
+{
+	Rgb_pattern *ref_pattern = create_rgb_pattern(element.color, element.width);
+	Rgb smaller_matrix[50][50];
+	build_smaller_matrix(wm, smaller_matrix, element.pos.x, element.pos.y);
+	Point matches[50];
+	int count = find_matching_pattern_smaller(*ref_pattern, element.pos.x, element.pos.y, smaller_matrix, matches, element.tol);
+	if (count < 10)	
+	{
+		printf("xx check_smaller_element()xx %s, found less than 10 times: (count:%d).\nreturn 0\n", element.name,count);
+		printf("sleep(1)\n");
+		sleep(1);
+		return 0;
+	}
+	printf(">> check_smaller_element()>> %s has been found %d times.\nreturn 1\n", element.name, count);
+	printf("Sleep 2 to see if multicheck are performed.\n");
+	sleep(2);
+	return 1;
+}
 
 int	check_ready_button(WinManager *wm)
 {
@@ -792,21 +873,26 @@ int	check_ready_button(WinManager *wm)
 	return 0;	
 }
 
-int	check_element(WinManager *wm, Rgb ref, int width, int x, int y, Rgb tol)
+int	check_element(WinManager *wm, ElementPattern element)
 {
-	Rgb_pattern *ref_pattern = create_rgb_pattern(ref, width);
+	Rgb_pattern *ref_pattern = create_rgb_pattern(element.color, element.width);
 	Rgb small_matrix[100][100];
-	build_color_matrix_small(wm, small_matrix, x, y);
+	build_color_matrix_small(wm, small_matrix, element.pos.x, element.pos.y);
 	Point matches[50];
-	int count = find_matching_pattern_small(*ref_pattern, x, y, small_matrix, matches, tol);
+	int count = find_matching_pattern_small(*ref_pattern, element.pos.x, element.pos.y, small_matrix, matches, element.tol);
 	if (count < 10)
 	{
-		printf("%s pattern not found(R:%d G:%d B:%d)\n", ref.color, ref.r, ref.g, ref.b);
+		printf("xx%s pattern found LESS THAN 10 times:(count:%d).xx(R:%d G:%d B:%d)\nreturn 0\n", element.name, count,element.color.r, element.color.g, element.color.b);
+		printf("sleep(1)\n");
+		sleep(1);
 		return 0;
 	}
-	printf("%s pattern found. return 1.\n",ref.color);
+	printf("%s pattern found. return 1.\n",element.name);
+	printf("Sleep 2 to see if multicheck are performed.\n");
+	sleep(2);
 	return 1;
 }
+
 
 int	check_color(Rgb ref, int w, int h, Rgb small_matrix[100][100])
 {

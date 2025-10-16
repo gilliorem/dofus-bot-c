@@ -66,6 +66,7 @@ bool	rgb_match(WinManager *wm, Rgb small_matrix[100][100], Rgb ref, Rgb tol, int
 int	count_matches(WinManager *wm, Rgb ref, Rgb small_matrix[100][100], Rgb tol, Point match[], int y, int x);
 int	check_state(WinManager *wm);
 
+
 void	build_color_matrix(WinManager *wm, Rgb color_matrix[1080][1920]);
 bool	pattern_match(Rgb color_matrix[1080][1920], Rgb *ref_color_pattern, int pattern_length, int x, int y, int tolerance);
 int	find_matching_pattern(Rgb *ref_color_pattern, Rgb color_matrix[1080][1920], int pattern_length, int tolerance, Point matches[216]);
@@ -75,12 +76,22 @@ bool	pattern_match_vertical(Rgb color_matrix_v[1920][1080], Rgb *ref_color_patte
 int	find_matching_pattern_v(Rgb *ref_color_pattern, Rgb color_matrix_v[1920][1080], int pattern_len, Point matches[]);
 
 void	build_color_matrix_small(WinManager *wm, Rgb color_matrix_small[100][100], int x, int y);
-bool	small_pattern_match(Rgb small_matrix[100][100], Rgb_pattern ref_pattern, Rgb tol);
+bool	small_pattern_match(Rgb small_matrix[100][100], Rgb_pattern ref_pattern, Rgb tol, int start_x, int start_y);
 int	find_matching_pattern_small(Rgb_pattern ref, int x, int y,
 		       			Rgb color_matrix_small[100][100],
 				       	Point matches[216],
 				       	Rgb tolerance);
-int	check_element(WinManager *wm, Rgb ref, int width, int x, int y, Rgb tol);
+int	check_element(WinManager *wm, ElementPattern element);
+
+void	build_color_matrix_smaller(WinManager *wm, Rgb color_matrix_small[50][50], int x, int y);
+bool	smaller_pattern_match(Rgb smaller_matrix[50][50], Rgb_pattern ref_pattern, Rgb tol, int start_x, int start_y);
+int	find_matching_pattern_smaller(Rgb_pattern ref, int x, int y,
+		       			Rgb color_matrix_smaller[50][50],
+				       	Point matches[216],
+				       	Rgb tolerance);
+
+int	check_smaller_element(WinManager *wm, ElementPattern element);
+
 int	check_ready_button(WinManager *wm);
 Rectangle build_po_zone(Point p);
 int find_matching_pattern_in_rect(Rgb *ref, int pattern_len, int tol,

@@ -183,3 +183,21 @@ In this specific case I need to check at least 3 elements on map
 	The end-combat window
 	The info-window (in case I Level-up)
 --------------------------- --------------------------- ---------------------------
+30.06
+Realised to 100x100 matrix is to big to check element like tactic icon
+Need to build a smaller matrix of 50x50
+
+Also realised my logic will be slightly different for unperfect pattern like player, scarecrow.
+need to think how I'm gonna check for 2D pattern like red and blue circle and then come back to center. Taking a 1h20 break. come back at 8:30. 
+
+-think of the toggle kind-of-check (tactic mode, circle mode)
+
+-Realized that I have now 4 set of functions doing the same thing with only one  variable
+	build matrix
+	check pattern
+	count match
+I should create a Matrix struct with a dynamic width and height so I can have only one set of function for building-checking-counting.
+
+1.07
+Today I will finish check for elements.
+and test it all.

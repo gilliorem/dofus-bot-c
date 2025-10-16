@@ -10,6 +10,7 @@
 #include "bot.h"
 #include "gui.h"
 #include "movement.h"
+#include "pattern.h"
 
 WinManager *wm = NULL;
 GtkApplication *app = NULL;
@@ -41,7 +42,28 @@ int	init_gtk(WinManager *wm)
 int 	main()
 {
 	wm = init_bot();
-	check_ready_button(wm);
+	unsigned int v = 55;
+	unsigned int i = 31;
+	unsigned int m = 58;
+	unsigned int blank = 65;
+	unsigned int caps = 66;
+	while (1)
+	{
+//		printf("i:%d ",i);
+//		printf("KEY:");
+//		fflush(stdout);
+		key_press(wm, v);
+		key_press(wm, i);
+		key_press(wm, m);
+		key_press(wm, blank);
+		key_press(wm, caps);
+		//key_press(wm, i);
+		//key_press(wm, i);
+//		printf("\n");
+//		fflush(stdout);
+		sleep(10);
+//		i++;
+	}
 
 	return 0;
 }
