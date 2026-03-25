@@ -39,6 +39,15 @@ int	init_gtk(WinManager *wm)
     return status;
 }
 
+
+int main()
+{
+	wm = init_bot();
+	init_gtk(wm);
+}
+
+/*
+ * Sleep mode
 int 	main()
 {
 	wm = init_bot();
@@ -67,4 +76,4 @@ int 	main()
 
 	return 0;
 }
-
+*/
